@@ -37,3 +37,10 @@ jobs:
           fi
       - name: Exercise installed CLI and packaging contract
         run: brew test pi-shared-ci/test/pi-shared
+      - name: Smoke recommended service setup in disposable HOME
+        env:
+          HOME: ${{ runner.temp }}/pi-shared-smoke-home
+        run: |
+          mkdir -p "$HOME"
+          pi-shared setup --mode cloud --yes
+          pi-shared status

@@ -113,10 +113,13 @@ extracts, executes, installs or publishes. A checksum is not provenance or
 compatibility proof: inspect the actual source and test it independently.
 
 The macOS workflow installs this exact committed tap checkout, chooses stable
-or HEAD according to its formula, and runs `brew test`. It does not invoke setup
-or start services. Offline helper tests and Ruby syntax checks do not replace
-that installation gate. pi-setup's isolated minimal smoke separately tests real
-extension dependencies and SDK profile loading. Module refs still include
+or HEAD according to its formula, and runs `brew test`. It then explicitly runs
+Cloud-mode setup and status in a disposable HOME on the ephemeral CI runner,
+checking the recommended gateway/browser services without provider/model calls.
+It does not touch your machine's services or select oMLX/search/recovery.
+Offline helper tests and Ruby syntax checks do not replace that installation
+and setup gate. pi-setup's isolated minimal smoke separately tests real extension
+dependencies and SDK profile loading. Module refs still include
 `main`; full-stack immutable dependency pinning and bottles are not claimed.
 
 License: Apache-2.0.
