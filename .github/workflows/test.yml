@@ -1,0 +1,39 @@
+name: Homebrew package
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_ANALYTICS: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Offline release-helper tests
+        run: python3 -B -m unittest discover -s tests -v
+      - name: Register this exact checkout as a disposable local tap
+        run: brew tap pi-shared-ci/test "$GITHUB_WORKSPACE"
+      - name: Install package without provisioning services or models
+        shell: bash
+        run: |
+          set -euo pipefail
+          metadata=$(brew info --json=v2 pi-shared-ci/test/pi-shared)
+          if jq -e '.formulae[0].versions.stable != null' <<< "$metadata" >/dev/null; then
+            brew install --build-from-source pi-shared-ci/test/pi-shared
+          else
+            brew install --HEAD --build-from-source pi-shared-ci/test/pi-shared
+          fi
+      - name: Exercise installed CLI and packaging contract
+        run: brew test pi-shared-ci/test/pi-shared
