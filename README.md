@@ -23,7 +23,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.1** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.2** and its source SHA-256, with a locked Pi
 **0.85.1** runtime. Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
@@ -53,6 +53,14 @@ completed work is not rolled back. Cloud credentials remain yours to configure.
 `--without-browser` omits browser-worker and Chromium; `--with-search` adds the
 search broker after its Brave key is provisioned. Optional private-app browser
 binaries and PowerPoint preview tools are separate prerequisites.
+
+After setup, open a new shell and run `pi-list`. Fresh setups provide
+`pi-list`, `pi-regen`, `pi-shared-update`, `pi-restart`, `pi-default`, and
+`pi-openai` before model configuration. No placeholder model catalog is created.
+Once the gateway alias export is configured, `pi-regen` generates and reloads
+model shortcuts. Existing launcher preferences and configured legacy launchers
+are preserved. Older package installations need a brew upgrade and an explicit
+setup rerun to enable bootstrap.
 
 If another installation already owns `pi`, reconcile the link conflict
 deliberately—never use `brew link --overwrite` blindly.
