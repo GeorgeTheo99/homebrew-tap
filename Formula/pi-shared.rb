@@ -27,6 +27,9 @@ class PiShared < Formula
     (buildpath/"empty-global-npmrc").write ""
     ENV["npm_config_cache"] = buildpath/"npm-cache"
     libexec.install "bin", "lib", "docs", "runtime", "install.sh", "manifest.yaml", "README.md", "LICENSE"
+    (libexec/"homebrew.json").write <<~JSON
+      {"manager":"homebrew","formula":"#{full_name}"}
+    JSON
     cd libexec/"runtime" do
       system "npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"
     end
@@ -59,7 +62,9 @@ class PiShared < Formula
       Setup can modify HOME and invoke independent module installers. Brew
       upgrade/uninstall does not update/delete those checkouts or stop their
       services. Manage them with pi-shared setup or their own operator tools.
-      Use brew upgrades, not pi update --self, for the packaged Pi runtime.
+      Use pi-shared update for the saved installation (including its owned
+      Homebrew runtime), not pi update --self. Background prompt refresh never
+      upgrades software, restarts services, or calls a model.
     EOS
   end
 

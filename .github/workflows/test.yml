@@ -44,6 +44,16 @@ jobs:
           mkdir -p "$HOME"
           pi-shared setup --mode cloud --yes
           pi-shared status
+          pi-shared update --plan
+          pid_for() { launchctl print "gui/$(id -u)/$1" | awk '/^[[:space:]]*pid =/ && !seen++ {print $3}'; }
+          gateway_before=$(pid_for com.local.model-gateway)
+          browser_before=$(pid_for com.local.mcp-browser-worker)
+          [[ "$gateway_before" =~ ^[0-9]+$ && "$browser_before" =~ ^[0-9]+$ ]]
+          pi-shared update --modules-only
+          test "$gateway_before" = "$(pid_for com.local.model-gateway)"
+          test "$browser_before" = "$(pid_for com.local.mcp-browser-worker)"
+          pi-shared update
+          pi-shared status
           zsh -f -c '
             source "$HOME/.zshrc" || exit $?
             for name in pi-list pi-regen pi-shared-update pi-default pi-openai pi-restart; do

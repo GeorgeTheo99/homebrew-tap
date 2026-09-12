@@ -89,6 +89,21 @@ for exact flags, service ownership, credentials, readiness boundaries and tests.
 
 ## Update or uninstall
 
+**Routine updates: `pi-shared update`.** The saved component selection is reused,
+so there is no repeated questionnaire. The command upgrades its owning Homebrew
+package, re-executes the updated CLI, applies changed selected components,
+synchronizes shared dependencies, refreshes shortcuts and verifies everything.
+Unchanged services are not restarted; prerequisite changes or repair retries may
+reapply selected services. `pi-shared update --plan` is read-only.
+
+Interactive prompts refresh changed local catalog/launcher data automatically,
+without software upgrades, service restarts or model/provider calls. Manual model
+edits are protected rather than overwritten. Older receipts require one setup
+run with original custom overrides to capture missing update settings. See
+[the update contract](https://github.com/GeorgeTheo99/pi-setup/blob/main/docs/updates.md).
+
+The lower-level operations remain available:
+
 - `brew upgrade GeorgeTheo99/tap/pi-shared` updates the packaged orchestrator
   and pinned Pi runtime. Use Homebrew, not `pi update` or global npm, for this
   runtime. For HEAD installs: `brew upgrade --fetch-HEAD GeorgeTheo99/tap/pi-shared`.
@@ -124,6 +139,8 @@ The macOS workflow installs this exact committed tap checkout, chooses stable
 or HEAD according to its formula, and runs `brew test`. It then explicitly runs
 Cloud-mode setup and status in a disposable HOME on the ephemeral CI runner,
 checking the recommended gateway/browser services without provider/model calls.
+It also verifies the saved update flow, unchanged-service PIDs, and the owning
+Homebrew re-exec path.
 It does not touch your machine's services or select oMLX/search/recovery.
 Offline helper tests and Ruby syntax checks do not replace that installation
 and setup gate. pi-setup's isolated minimal smoke separately tests real extension
