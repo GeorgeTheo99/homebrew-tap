@@ -44,3 +44,11 @@ jobs:
           mkdir -p "$HOME"
           pi-shared setup --mode cloud --yes
           pi-shared status
+          zsh -f -c '
+            source "$HOME/.zshrc" || exit $?
+            for name in pi-list pi-regen pi-shared-update pi-default pi-openai pi-restart; do
+              (( $+functions[$name] )) || exit 8
+            done
+            pi-list || exit $?
+            pi-regen --check
+          '
