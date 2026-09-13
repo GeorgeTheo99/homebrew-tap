@@ -9,11 +9,42 @@ remain independent repositories, not vendored copies in Homebrew.
 
 ## Install
 
+Review [the formula](Formula/pi-shared.rb) and its source before granting trust.
+The first command persistently trusts only this formula, including future
+revisions—not the entire tap. On older Homebrew versions without `brew trust`,
+omit that first command.
+
 ```sh
-brew install GeorgeTheo99/tap/pi-shared
+brew trust --formula georgetheo99/tap/pi-shared
+brew install georgetheo99/tap/pi-shared
 pi-shared setup
 pi
 ```
+
+### Homebrew trust errors
+
+If Homebrew refuses to load `georgetheo99/tap/pi-shared` from an **untrusted
+tap**, review [the formula](Formula/pi-shared.rb) and its source before granting
+trust. If you trust this package, run:
+
+```sh
+brew trust --formula georgetheo99/tap/pi-shared
+brew install georgetheo99/tap/pi-shared
+pi-shared setup
+```
+
+The explicit `--formula` command works even before the tap is installed, so run
+it first if `brew tap` failed. It persistently trusts this formula, including
+future revisions, without trusting every formula, cask, and command in the tap.
+No separate `brew tap` or global trust bypass is needed.
+
+On Homebrew 6.0.22, repeated trust rejections during tap validation can end with
+`Cannot tap georgetheo99/tap: invalid syntax in tap!`. When preceded by those
+trust errors, that final message does not establish a Ruby syntax defect. If
+installation still fails after granting trust, inspect the new error rather
+than broadening trust.
+
+### Preview setup
 
 Preview without changing anything:
 
