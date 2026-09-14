@@ -1,9 +1,12 @@
+require "uri"
+
 class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-setup"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
   url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.3.tar.gz"
   version "0.1.3"
+  revision 1
   sha256 "e222bbf093145d285932c0075416a0340587a93bad01e08b29e27ca6b1d70034"
   # END STABLE RELEASE
   license "Apache-2.0"
@@ -26,6 +29,14 @@ class PiShared < Formula
     ENV["npm_config_globalconfig"] = buildpath/"empty-global-npmrc"
     (buildpath/"empty-global-npmrc").write ""
     ENV["npm_config_cache"] = buildpath/"npm-cache"
+    # Homebrew 7 filters ordinary npm_* variables before formula evaluation.
+    # A generic, explicit mirror override retains lockfile integrity checks.
+    if (registry = ENV["HOMEBREW_NPM_REGISTRY"])
+      uri = URI.parse(registry)
+      odie "HOMEBREW_NPM_REGISTRY must be a credential-free HTTPS registry URL" unless
+        uri.is_a?(URI::HTTPS) && uri.host && !uri.userinfo && !uri.query && !uri.fragment
+      ENV["npm_config_registry"] = registry
+    end
     libexec.install "bin", "lib", "docs", "runtime", "install.sh", "manifest.yaml", "README.md", "LICENSE"
     (libexec/"homebrew.json").write <<~JSON
       {"manager":"homebrew","formula":"#{full_name}"}

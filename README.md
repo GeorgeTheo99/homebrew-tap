@@ -44,6 +44,23 @@ trust errors, that final message does not establish a Ruby syntax defect. If
 installation still fails after granting trust, inspect the new error rather
 than broadening trust.
 
+### Optional npm mirror
+
+On networks that require an approved npm mirror, set the generic
+`HOMEBREW_NPM_REGISTRY` override before installing or upgrading. Use a
+credential-free HTTPS registry URL (no userinfo, query, or fragment):
+
+```sh
+HOMEBREW_NPM_REGISTRY=https://npm-mirror.example.com/ brew install georgetheo99/tap/pi-shared
+```
+
+Homebrew 7 filters ordinary `npm_config_registry` variables. This explicit
+Homebrew-prefixed setting is forwarded to npm without reading user npmrc files;
+the committed lockfile and integrity verification remain unchanged. Persist it
+in your own Homebrew environment configuration when required for future upgrades.
+Without the setting, npm's public registry remains the default. No organization
+or private overlay is assumed by this formula.
+
 ### Preview setup
 
 Preview without changing anything:
