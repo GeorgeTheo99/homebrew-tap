@@ -31,7 +31,7 @@ class NpmRegistryTests(unittest.TestCase):
 
     def test_credentials_and_non_https_or_ambiguous_urls_are_rejected(self):
         for url in ("http://example.com/", "https://user:example@example.com/", "https://example.com/?token=example",
-                    "https://example.com/#fragment", "https:///registry", "not a URL"):
+                    "https://example.com/#fragment", "https:///registry", "https://", "https://:443/registry", "not a URL"):
             with self.subTest(url=url):
                 self.assertNotEqual(self.run_block(url).returncode, 0)
 

@@ -35,7 +35,7 @@ class PiShared < Formula
       uri = URI.parse(registry)
       odie "HOMEBREW_NPM_REGISTRY must be a credential-free HTTPS registry URL" unless
         registry.match?(%r{\Ahttps://[^/\s]+(?:/|\z)}i) &&
-        uri.is_a?(URI::HTTPS) && uri.host && !uri.userinfo && !uri.query && !uri.fragment
+        uri.is_a?(URI::HTTPS) && !uri.host.to_s.empty? && !uri.userinfo && !uri.query && !uri.fragment
       ENV["npm_config_registry"] = registry
     end
     libexec.install "bin", "lib", "docs", "runtime", "install.sh", "manifest.yaml", "README.md", "LICENSE"
