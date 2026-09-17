@@ -4,10 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-setup"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.3.tar.gz"
-  version "0.1.3"
-  revision 1
-  sha256 "e222bbf093145d285932c0075416a0340587a93bad01e08b29e27ca6b1d70034"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.4.tar.gz"
+  version "0.1.4"
+  sha256 "b170bcc9ef405c9f466ccdeeb06a7655d8eca291d356f8ffa50e44b64dda9036"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -84,6 +83,9 @@ class PiShared < Formula
     ENV["PI_OFFLINE"] = "1"
     assert_match "setup", shell_output("#{bin}/pi-shared --help")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
+    assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --help")
+    assert_match "--require-omnigent", shell_output("#{bin}/pi-shared status --help")
+    assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --plan --mode later --without-browser --with-omnigent")
     assert_match "Setup plan", shell_output("#{bin}/pi-shared setup --plan --mode later")
     assert_match "0.85.1", shell_output("#{bin}/pi --version")
     assert_equal libexec/"runtime/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js",

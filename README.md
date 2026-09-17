@@ -71,7 +71,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.3** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.4** and its source SHA-256, with a locked Pi
 **0.85.1** runtime. Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
@@ -97,6 +97,18 @@ completed work is not rolled back. Cloud credentials remain yours to configure.
 | Local | Same modules, plus explicit oMLX choices |
 | Both | Cloud and local choices |
 | Later | Shared resources and browser-worker; configure models later |
+
+Omnigent compatibility is opt-in, not a dependency of normal setup:
+
+```sh
+pi-shared setup --mode cloud --with-omnigent --plan
+pi-shared setup --mode cloud --with-omnigent
+pi-shared status --require-omnigent
+```
+
+This adds native-Pi prerequisite/package checks only. It does not install
+Omnigent, launch sessions, or verify inference; see the
+[compatibility contract](https://github.com/GeorgeTheo99/pi-setup/blob/main/docs/omnigent-compatibility.md).
 
 `--without-browser` omits browser-worker and Chromium; `--with-search` adds the
 search broker after its Brave key is provisioned. Optional private-app browser
