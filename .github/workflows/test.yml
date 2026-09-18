@@ -55,7 +55,17 @@ jobs:
           pi-shared update
           pi-shared status
           test ! -e "$HOME/.zshrc"
-          pi --launcher-list
+          printf '%s\n' '# keep custom config' '[ -f ~/.pi/generated/pi-launchers.zsh ] && source ~/.pi/generated/pi-launchers.zsh' > "$HOME/.zshrc"
+          cp "$HOME/.zshrc" "$RUNNER_TEMP/pi-original-zshrc"
+          pi-shared update --modules-only
+          test "$(cat "$HOME/.zshrc")" = '# keep custom config'
+          backups=("$HOME"/.zshrc.bak-*)
+          test "${#backups[@]}" = 1
+          cmp "$RUNNER_TEMP/pi-original-zshrc" "${backups[0]}"
+          pi models > "$RUNNER_TEMP/pi-models.txt"
+          pi --launcher-list > "$RUNNER_TEMP/pi-launcher-list.txt"
+          cmp "$RUNNER_TEMP/pi-models.txt" "$RUNNER_TEMP/pi-launcher-list.txt"
+          pi list
           pi --launcher-check
           pi --launcher-refresh
           pi openai --default

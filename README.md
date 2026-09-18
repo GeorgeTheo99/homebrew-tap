@@ -71,7 +71,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.5** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.6** and its source SHA-256, with a locked Pi
 **0.85.1** runtime. Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
@@ -115,7 +115,8 @@ Omnigent, launch sessions, or verify inference; see the
 search broker after its Brave key is provisioned. Optional private-app browser
 binaries and PowerPoint preview tools are separate prerequisites.
 
-After setup, use `pi --launcher-list`, `pi openai`, or `pi <model-alias>`.
+After setup, use `pi models`, `pi openai`, or `pi <model-alias>`.
+`pi --launcher-list` remains supported.
 `pi openai --default` saves the default and exits; bare `pi` starts with your
 saved choice. `pi --launcher-refresh` refreshes local routing metadata. No
 placeholder model catalog or generated shell functions are needed. Setup/update

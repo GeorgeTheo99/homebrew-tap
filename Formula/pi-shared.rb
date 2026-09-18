@@ -4,9 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-setup"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.5.tar.gz"
-  version "0.1.5"
-  sha256 "578f69860a8edb3cb59c1901e6ffd5fc04b80c98c0017d2f259a0867cce3093f"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.6.tar.gz"
+  version "0.1.6"
+  sha256 "45d9b9b3ca5b0a5b845b2b72edc355e34b494626a43f35bfad11021c13b6ae99"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -81,6 +81,7 @@ class PiShared < Formula
       Use pi-shared update for the saved installation (including its owned
       Homebrew runtime), not pi update --self. After setup, use pi openai or
       pi <model-alias>; pi <model-alias> --default saves your default.
+      pi models lists model aliases; pi list continues to list packages.
       No generated shell functions or shell-startup hook are required.
     EOS
   end
@@ -94,6 +95,7 @@ class PiShared < Formula
     assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --plan --mode later --without-browser --with-omnigent")
     assert_match "Setup plan", shell_output("#{bin}/pi-shared setup --plan --mode later")
     assert_match "0.85.1", shell_output("#{bin}/pi --version")
+    assert_match "launcher support is not installed", shell_output("#{bin}/pi models 2>&1", 1)
     assert_equal libexec/"runtime/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js",
                  (bin/"pi-upstream").realpath
     assert_match "0.85.1", shell_output("#{bin}/pi-upstream --version")
