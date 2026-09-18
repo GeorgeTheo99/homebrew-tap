@@ -71,7 +71,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.4** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.5** and its source SHA-256, with a locked Pi
 **0.85.1** runtime. Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
@@ -81,13 +81,14 @@ Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
   `uv`, and Git. The core package does not require Apple Silicon.
 - The Pi CLI and setup orchestrator under Homebrew `libexec`. npm uses the
   committed lockfile with lifecycle scripts disabled; its cache/config stay in
-  the disposable build directory. The `pi` symlink preserves SDK discovery.
+  the disposable build directory. `pi` is a thin dispatcher; `pi-upstream` is
+  the stock-runtime symlink used for recovery and SDK discovery.
 - **Nothing is provisioned automatically:** no Pi profile or shell changes,
   credential prompts, service registration, or LLM downloads during
   `brew install`. Homebrew still manages its normal prefix/cache/dependencies.
 
 Only explicit `pi-shared setup` clones selected modules, installs their locked
-dependencies, wires profiles and shell commands, starts their services, and runs
+dependencies, wires profiles and CLI configuration, starts their services, and runs
 module checks. It shows a plan and asks before applying it. EOF/Ctrl-C cancels;
 completed work is not rolled back. Cloud credentials remain yours to configure.
 
@@ -114,13 +115,14 @@ Omnigent, launch sessions, or verify inference; see the
 search broker after its Brave key is provisioned. Optional private-app browser
 binaries and PowerPoint preview tools are separate prerequisites.
 
-After setup, open a new shell and run `pi-list`. Fresh setups provide
-`pi-list`, `pi-regen`, `pi-shared-update`, `pi-restart`, `pi-default`, and
-`pi-openai` before model configuration. No placeholder model catalog is created.
-Once the gateway alias export is configured, `pi-regen` generates and reloads
-model shortcuts. Existing launcher preferences and configured legacy launchers
-are preserved. Older package installations need a brew upgrade and an explicit
-setup rerun to enable bootstrap.
+After setup, use `pi --launcher-list`, `pi openai`, or `pi <model-alias>`.
+`pi openai --default` saves the default and exits; bare `pi` starts with your
+saved choice. `pi --launcher-refresh` refreshes local routing metadata. No
+placeholder model catalog or generated shell functions are needed. Setup/update
+migrates recognized legacy launcher wiring with a private backup, preserving
+unrelated shell content. Existing shells need one restart to drop old functions.
+Normal Pi commands remain available, including `pi list` for packages; use
+`pi -- openai` to send the literal prompt rather than select the alias.
 
 If another installation already owns `pi`, reconcile the link conflict
 deliberately—never use `brew link --overwrite` blindly.
@@ -156,9 +158,9 @@ synchronizes shared dependencies, refreshes shortcuts and verifies everything.
 Unchanged services are not restarted; prerequisite changes or repair retries may
 reapply selected services. `pi-shared update --plan` is read-only.
 
-Interactive prompts refresh changed local catalog/launcher data automatically,
-without software upgrades, service restarts or model/provider calls. Manual model
-edits are protected rather than overwritten. Older receipts require one setup
+Alias launches refresh changed local routing data without software upgrades,
+service restarts or model/provider calls. Manual model edits are protected rather
+than overwritten; no shell prompt hook is installed. Older receipts require one setup
 run with original custom overrides to capture missing update settings. See
 [the update contract](https://github.com/GeorgeTheo99/pi-setup/blob/main/docs/updates.md).
 

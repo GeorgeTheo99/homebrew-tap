@@ -4,9 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-setup"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.4.tar.gz"
-  version "0.1.4"
-  sha256 "b170bcc9ef405c9f466ccdeeb06a7655d8eca291d356f8ffa50e44b64dda9036"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.5.tar.gz"
+  version "0.1.5"
+  sha256 "578f69860a8edb3cb59c1901e6ffd5fc04b80c98c0017d2f259a0867cce3093f"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -18,7 +18,7 @@ class PiShared < Formula
   depends_on "uv"
 
   def install
-    %w[bin/pi-shared runtime/package.json runtime/package-lock.json].each do |file|
+    %w[bin/pi bin/pi-shared runtime/package.json runtime/package-lock.json].each do |file|
       odie "Source is not packaging-ready: missing #{file}" unless (buildpath/file).file?
     end
 
@@ -45,16 +45,21 @@ class PiShared < Formula
       system "npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"
     end
 
-    # A real symlink lets pi-profile-check discover the installed Pi SDK.
+    # Keep an explicit stock-runtime entry point for recovery and SDK discovery.
     pi_cli = libexec/"runtime/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js"
     inreplace pi_cli, "#!/usr/bin/env node", "#!#{Formula["node"].opt_bin}/node"
-    bin.install_symlink pi_cli => "pi"
+    bin.install_symlink pi_cli => "pi-upstream"
 
+    inreplace libexec/"bin/pi", "#!/usr/bin/env python3",
+              "#!#{Formula["python@3.12"].opt_bin}/python3.12"
     inreplace libexec/"bin/pi-shared", "#!/usr/bin/env python3",
               "#!#{Formula["python@3.12"].opt_bin}/python3.12"
     paths = [bin, Formula["node"].opt_bin, Formula["python@3.12"].opt_libexec/"bin",
              Formula["uv"].opt_bin, Formula["git"].opt_bin, HOMEBREW_PREFIX/"bin"]
     (bin/"pi-shared").write_env_script libexec/"bin/pi-shared", PATH: "#{paths.join(":")}:$PATH"
+    (bin/"pi").write_env_script libexec/"bin/pi",
+                               PATH: "#{paths.join(":")}:$PATH",
+                               PI_UPSTREAM_BIN: (bin/"pi-upstream").to_s
   end
 
   def caveats
@@ -74,8 +79,9 @@ class PiShared < Formula
       upgrade/uninstall does not update/delete those checkouts or stop their
       services. Manage them with pi-shared setup or their own operator tools.
       Use pi-shared update for the saved installation (including its owned
-      Homebrew runtime), not pi update --self. Background prompt refresh never
-      upgrades software, restarts services, or calls a model.
+      Homebrew runtime), not pi update --self. After setup, use pi openai or
+      pi <model-alias>; pi <model-alias> --default saves your default.
+      No generated shell functions or shell-startup hook are required.
     EOS
   end
 
@@ -89,6 +95,8 @@ class PiShared < Formula
     assert_match "Setup plan", shell_output("#{bin}/pi-shared setup --plan --mode later")
     assert_match "0.85.1", shell_output("#{bin}/pi --version")
     assert_equal libexec/"runtime/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js",
-                 (bin/"pi").realpath
+                 (bin/"pi-upstream").realpath
+    assert_match "0.85.1", shell_output("#{bin}/pi-upstream --version")
+    refute_path_exists testpath/".zshrc"
   end
 end

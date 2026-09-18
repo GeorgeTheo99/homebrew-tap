@@ -54,11 +54,11 @@ jobs:
           test "$browser_before" = "$(pid_for com.local.mcp-browser-worker)"
           pi-shared update
           pi-shared status
-          zsh -f -c '
-            source "$HOME/.zshrc" || exit $?
-            for name in pi-list pi-regen pi-shared-update pi-default pi-openai pi-restart; do
-              (( $+functions[$name] )) || exit 8
-            done
-            pi-list || exit $?
-            pi-regen --check
-          '
+          test ! -e "$HOME/.zshrc"
+          pi --launcher-list
+          pi --launcher-check
+          pi --launcher-refresh
+          pi openai --default
+          test "$(jq -r .defaultProvider "$HOME/.pi/agent/settings.json")" = openai-codex
+          pi --version
+          pi-upstream --version
