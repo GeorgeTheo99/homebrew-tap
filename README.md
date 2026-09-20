@@ -3,7 +3,9 @@
 [![Homebrew package](https://github.com/GeorgeTheo99/homebrew-tap/actions/workflows/test.yml/badge.svg)](https://github.com/GeorgeTheo99/homebrew-tap/actions/workflows/test.yml)
 
 Install a Pi coding-agent environment with explicit, modular setup. The public
-package/command is **pi-shared**; installation orchestration lives in
+package/command is **pi-shared**; start with the
+[main project README](https://github.com/GeorgeTheo99/pi-shared).
+Installation orchestration lives in
 [pi-setup](https://github.com/GeorgeTheo99/pi-setup). Shared resources and services
 remain independent repositories, not vendored copies in Homebrew.
 
@@ -71,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.6** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.7** and its source SHA-256, with a locked Pi
 **0.85.1** runtime. Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
@@ -98,6 +100,21 @@ completed work is not rolled back. Cloud credentials remain yours to configure.
 | Local | Same modules, plus explicit oMLX choices |
 | Both | Cloud and local choices |
 | Later | Shared resources and browser-worker; configure models later |
+| Existing gateway | Shared resources and browser-worker; direct remote server access, no local gateway/oMLX |
+
+For an existing server gateway, choose **Existing gateway** during setup or run:
+
+```sh
+pi-shared setup --mode existing-gateway \
+  --gateway-url https://server.example-tailnet.ts.net \
+  --gateway-key-file "$HOME/.config/pi-shared/gateway.key"
+```
+
+Use an already-provisioned client key in an owned, non-symlinked `0600` file.
+Trusted private/Tailscale HTTP requires a numeric private IP and explicit
+`--allow-private-http`. Setup reads the authenticated catalog but does not modify
+or manage the server; updates/status check the saved connection offline. See
+[remote gateway setup](https://github.com/GeorgeTheo99/pi-shared/blob/main/docs/existing-gateway.md).
 
 Omnigent compatibility is opt-in, not a dependency of normal setup:
 
@@ -199,8 +216,11 @@ extracts, executes, installs or publishes. A checksum is not provenance or
 compatibility proof: inspect the actual source and test it independently.
 
 The macOS workflow installs this exact committed tap checkout, chooses stable
-or HEAD according to its formula, and runs `brew test`. It then explicitly runs
-Cloud-mode setup and status in a disposable HOME on the ephemeral CI runner,
+or HEAD according to its formula, and runs `brew test`. It exercises direct
+remote setup against an authenticated fake loopback gateway in disposable HOME,
+then stops that server and verifies offline update/status. No real provider is
+contacted. It also explicitly runs Cloud-mode setup and status in another
+disposable HOME on the ephemeral CI runner,
 checking the recommended gateway/browser services without provider/model calls.
 It also verifies the saved update flow, unchanged-service PIDs, and the owning
 Homebrew re-exec path.

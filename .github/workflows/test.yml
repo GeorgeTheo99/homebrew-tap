@@ -24,7 +24,13 @@ jobs:
       - name: Offline release-helper tests
         run: python3 -B -m unittest discover -s tests -v
       - name: Register this exact checkout as a disposable local tap
-        run: brew tap pi-shared-ci/test "$GITHUB_WORKSPACE"
+        run: |
+          # PR checkouts are detached merge commits. Give this disposable local
+          # origin a main branch so the real brew-update smoke can fetch it.
+          # This does not change the reviewed commit or any remote branch.
+          git switch -C main
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          brew tap pi-shared-ci/test "$GITHUB_WORKSPACE"
       - name: Install package without provisioning services or models
         shell: bash
         run: |
@@ -37,6 +43,8 @@ jobs:
           fi
       - name: Exercise installed CLI and packaging contract
         run: brew test pi-shared-ci/test/pi-shared
+      - name: Smoke direct remote gateway setup and offline lifecycle
+        run: python3 -B tests/smoke_existing_gateway.py
       - name: Smoke recommended service setup in disposable HOME
         env:
           HOME: ${{ runner.temp }}/pi-shared-smoke-home

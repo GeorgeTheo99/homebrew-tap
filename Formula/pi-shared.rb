@@ -2,11 +2,11 @@ require "uri"
 
 class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
-  homepage "https://github.com/GeorgeTheo99/pi-setup"
+  homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.6.tar.gz"
-  version "0.1.6"
-  sha256 "45d9b9b3ca5b0a5b845b2b72edc355e34b494626a43f35bfad11021c13b6ae99"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.7.tar.gz"
+  version "0.1.7"
+  sha256 "0e50786a5ffb917161252ff01b6fd718ddfa9b1d609e15f1c7ac811e6fe5c159"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -73,6 +73,8 @@ class PiShared < Formula
 
       For local Apple Silicon models, choose oMLX during setup, or run:
         pi-shared setup --local
+      To connect directly to an existing server gateway (including Tailscale),
+      choose Existing gateway in setup; no local gateway service is installed.
       pi-fallback is a separate optional recovery prototype, not a dependency.
 
       Setup can modify HOME and invoke independent module installers. Brew
@@ -90,6 +92,13 @@ class PiShared < Formula
     ENV["PI_OFFLINE"] = "1"
     assert_match "setup", shell_output("#{bin}/pi-shared --help")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
+    assert_match "0.1.7", shell_output("#{bin}/pi-shared --version")
+    assert_match "--gateway-key-file", shell_output("#{bin}/pi-shared setup --help")
+    assert_match "Direct external gateway", shell_output(
+      "#{bin}/pi-shared setup --plan --mode existing-gateway --without-browser " \
+      "--gateway-url http://100.100.1.2:9111 --allow-private-http --gateway-key-file #{testpath}/missing.key"
+    )
+    refute_path_exists testpath/".config/pi-shared/setup.json"
     assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --help")
     assert_match "--require-omnigent", shell_output("#{bin}/pi-shared status --help")
     assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --plan --mode later --without-browser --with-omnigent")
