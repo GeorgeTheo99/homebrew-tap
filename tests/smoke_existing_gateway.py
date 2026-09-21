@@ -81,6 +81,13 @@ def main():
             server.server_close()
             stopped = True
             run("pi", "models")
+            listing = json.loads(subprocess.check_output(["pi", "models", "--json"], env=env, text=True))
+            remote = [row for row in listing["models"] if row["gateway"]]
+            assert len(remote) == 1 and remote[0]["group"] == "gateway"
+            assert remote[0]["model"] == "smoke-model"
+            assert json.loads(subprocess.check_output(["pi", "models", "--cloud", "--json"], env=env, text=True))["models"] == []
+            assert "Route: " in subprocess.check_output(["pi", "models", "--verbose"], env=env, text=True)
+            assert "smoke-model" in subprocess.check_output(["pi", "--launcher-list"], env=env, text=True)
             run("pi", "--launcher-check")
             run("pi", alias, "--default")
             run("pi-shared", "status")

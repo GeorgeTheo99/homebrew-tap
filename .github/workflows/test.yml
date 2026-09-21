@@ -74,7 +74,12 @@ jobs:
           cmp "$RUNNER_TEMP/pi-original-zshrc" "${backups[0]}"
           pi models > "$RUNNER_TEMP/pi-models.txt"
           pi --launcher-list > "$RUNNER_TEMP/pi-launcher-list.txt"
-          cmp "$RUNNER_TEMP/pi-models.txt" "$RUNNER_TEMP/pi-launcher-list.txt"
+          grep -q 'DIRECT · subscription' "$RUNNER_TEMP/pi-models.txt"
+          pi models --json > "$RUNNER_TEMP/pi-models.json"
+          jq -e '.version == 1 and (.models | any(.alias == "openai" and .group == "direct"))' "$RUNNER_TEMP/pi-models.json"
+          jq -r '.models[] | .alias, .aliases[]' "$RUNNER_TEMP/pi-models.json" | sort > "$RUNNER_TEMP/pi-json-aliases.txt"
+          cut -f1 "$RUNNER_TEMP/pi-launcher-list.txt" | sort > "$RUNNER_TEMP/pi-tsv-aliases.txt"
+          cmp "$RUNNER_TEMP/pi-json-aliases.txt" "$RUNNER_TEMP/pi-tsv-aliases.txt"
           pi list
           pi --launcher-check
           pi --launcher-refresh

@@ -46,10 +46,18 @@ def main():
         assert Path(receipt["agent_dir"]) == profile
         del env["PI_SHARED_AGENT_DIR"]  # Subsequent operations must use saved paths.
         run("pi", "models")
+        listing = json.loads(subprocess.check_output(["pi", "models", "--direct", "--json"], env=env, text=True))
+        assert [row["alias"] for row in listing["models"]] == ["openai"]
+        assert listing["models"][0]["group"] == "direct"
+        assert json.loads(subprocess.check_output(["pi", "models", "--local", "--json"], env=env, text=True))["models"] == []
+        assert "Route: openai-codex/" in subprocess.check_output(["pi", "models", "--verbose"], env=env, text=True)
         run("pi", "--launcher-check")
         run("pi", "openai", "--default")
         expected_default = json.loads((profile / "settings.json").read_text())
         assert expected_default["defaultProvider"] == "openai-codex"
+        listing = json.loads(subprocess.check_output(["pi", "models", "--json"], env=env, text=True))
+        assert listing["models"][0]["default"] is True
+        assert listing["savedDefault"]["profile"] == str(profile)
         run("pi-shared", "setup", "--mode", "direct", "--without-browser", "--yes")
         run("pi-shared", "status")
         run("pi-shared", "update", "--modules-only")
