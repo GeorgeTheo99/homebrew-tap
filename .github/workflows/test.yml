@@ -43,6 +43,8 @@ jobs:
           fi
       - name: Exercise installed CLI and packaging contract
         run: brew test pi-shared-ci/test/pi-shared
+      - name: Smoke native direct-only setup and saved lifecycle
+        run: python3 -B tests/smoke_direct.py
       - name: Smoke direct remote gateway setup and offline lifecycle
         run: python3 -B tests/smoke_existing_gateway.py
       - name: Smoke recommended service setup in disposable HOME

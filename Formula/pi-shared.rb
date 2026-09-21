@@ -4,9 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.7.tar.gz"
-  version "0.1.7"
-  sha256 "0e50786a5ffb917161252ff01b6fd718ddfa9b1d609e15f1c7ac811e6fe5c159"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.8.tar.gz"
+  version "0.1.8"
+  sha256 "fc7f2a131c10ceb376192c21f36017095f24cd99a99ab038fe8cc873a9aa5105"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -71,6 +71,8 @@ class PiShared < Formula
         pi-shared setup --plan --mode later
         pi-shared setup
 
+      For native Pi subscriptions/API keys without a local gateway, run:
+        pi-shared setup --mode direct
       For local Apple Silicon models, choose oMLX during setup, or run:
         pi-shared setup --local
       To connect directly to an existing server gateway (including Tailscale),
@@ -92,7 +94,8 @@ class PiShared < Formula
     ENV["PI_OFFLINE"] = "1"
     assert_match "setup", shell_output("#{bin}/pi-shared --help")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
-    assert_match "0.1.7", shell_output("#{bin}/pi-shared --version")
+    assert_match "0.1.8", shell_output("#{bin}/pi-shared --version")
+    assert_match "Direct-only policy", shell_output("#{bin}/pi-shared setup --plan --mode direct --without-browser")
     assert_match "--gateway-key-file", shell_output("#{bin}/pi-shared setup --help")
     assert_match "Direct external gateway", shell_output(
       "#{bin}/pi-shared setup --plan --mode existing-gateway --without-browser " \

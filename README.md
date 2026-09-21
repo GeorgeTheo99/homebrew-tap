@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.7** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.8** and its source SHA-256, with a locked Pi
 **0.85.1** runtime. Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
@@ -96,11 +96,18 @@ completed work is not rolled back. Cloud credentials remain yours to configure.
 
 | Setup mode | Modules |
 |---|---|
+| Direct | Shared resources and browser-worker; native subscriptions/API keys, no gateway/oMLX |
 | Cloud | Shared resources, model-gateway, browser-worker |
 | Local | Same modules, plus explicit oMLX choices |
 | Both | Cloud and local choices |
 | Later | Shared resources and browser-worker; configure models later |
 | Existing gateway | Shared resources and browser-worker; direct remote server access, no local gateway/oMLX |
+
+For native Pi subscriptions/API keys without model-gateway, choose **Direct** or
+run `pi-shared setup --mode direct`. Authentication and model selection remain in
+Pi (`/login`, `/model`); `pi openai` is the existing Codex subscription shortcut,
+not API-key billing. Existing gateway selections are not migrated automatically.
+See [direct providers](https://github.com/GeorgeTheo99/pi-shared/blob/main/docs/direct-providers.md).
 
 For an existing server gateway, choose **Existing gateway** during setup or run:
 
@@ -216,7 +223,9 @@ extracts, executes, installs or publishes. A checksum is not provenance or
 compatibility proof: inspect the actual source and test it independently.
 
 The macOS workflow installs this exact committed tap checkout, chooses stable
-or HEAD according to its formula, and runs `brew test`. It exercises direct
+or HEAD according to its formula, and runs `brew test`. It exercises native
+direct-only setup with a custom saved profile and unchanged native auth/models,
+then verifies rerun/update/status without gateway services. It also exercises direct
 remote setup against an authenticated fake loopback gateway in disposable HOME,
 then stops that server and verifies offline update/status. No real provider is
 contacted. It also explicitly runs Cloud-mode setup and status in another
