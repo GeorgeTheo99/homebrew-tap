@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.10** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.11** and its source SHA-256, with a locked Pi
 **0.87.1** runtime. Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
