@@ -62,7 +62,8 @@ jobs:
           pi-shared update --modules-only
           test "$gateway_before" = "$(pid_for com.local.model-gateway)"
           test "$browser_before" = "$(pid_for com.local.mcp-browser-worker)"
-          pi-shared update
+          # Exercise the package wrapper alias through the Homebrew re-exec path.
+          pi update
           pi-shared status
           test ! -e "$HOME/.zshrc"
           printf '%s\n' '# keep custom config' '[ -f ~/.pi/generated/pi-launchers.zsh ] && source ~/.pi/generated/pi-launchers.zsh' > "$HOME/.zshrc"

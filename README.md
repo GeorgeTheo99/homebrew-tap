@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.10** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.11** and its source SHA-256, with a locked Pi
 **0.87.1** runtime. Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
@@ -180,7 +180,11 @@ for exact flags, service ownership, credentials, readiness boundaries and tests.
 
 ## Update or uninstall
 
-**Routine updates: `pi-shared update`.** The saved component selection is reused,
+**Routine updates: `pi-shared update`, or bare `pi update` with package 0.1.11+.**
+Both use the owning package's updater for the runtime and saved modules.
+Explicit `pi update` arguments retain stock behavior: for example,
+`pi update --extensions` updates Pi packages only. Use `pi-shared update --plan`
+for a managed preview. The saved component selection is reused,
 so there is no repeated questionnaire. The command upgrades its owning Homebrew
 package, re-executes the updated CLI, applies changed selected components,
 synchronizes shared dependencies, refreshes shortcuts and verifies everything.
@@ -198,8 +202,9 @@ run with original custom overrides to capture missing update settings. See
 The lower-level operations remain available:
 
 - `brew upgrade GeorgeTheo99/tap/pi-shared` updates the packaged orchestrator
-  and pinned Pi runtime. Use Homebrew, not `pi update` or global npm, for this
-  runtime. For HEAD installs: `brew upgrade --fetch-HEAD GeorgeTheo99/tap/pi-shared`.
+  and pinned Pi runtime. Bare `pi update` delegates to the managed updater in
+  package 0.1.11+; explicit stock self-update flags and global npm do not manage
+  this runtime. For HEAD installs: `brew upgrade --fetch-HEAD GeorgeTheo99/tap/pi-shared`.
 - `pi-shared setup --mode ... --update` explicitly updates/reinstalls selected
   writable modules. Include optional selections again. Homebrew upgrades do not
   run these installers or restart their services.
