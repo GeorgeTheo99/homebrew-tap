@@ -82,8 +82,10 @@ class PiShared < Formula
       Setup can modify HOME and invoke independent module installers. Brew
       upgrade/uninstall does not update/delete those checkouts or stop their
       services. Manage them with pi-shared setup or their own operator tools.
-      Use pi-shared update for the saved installation (including its owned
-      Homebrew runtime), not pi update --self. After setup, use pi openai or
+      Use pi-shared update or bare pi update for the saved installation
+      (including its owned Homebrew runtime). Explicit update options keep
+      stock behavior; pi update --self cannot update this runtime.
+      After setup, use pi openai or
       pi <model-alias>; pi <model-alias> --default saves your default.
       pi models lists model aliases; pi list continues to list packages.
       No generated shell functions or shell-startup hook are required.
@@ -94,7 +96,7 @@ class PiShared < Formula
     ENV["PI_OFFLINE"] = "1"
     assert_match "setup", shell_output("#{bin}/pi-shared --help")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
-    assert_match "0.1.10", shell_output("#{bin}/pi-shared --version")
+    assert_match "0.1.11", shell_output("#{bin}/pi-shared --version")
     assert_match "Direct-only policy", shell_output("#{bin}/pi-shared setup --plan --mode direct --without-browser")
     assert_match "--gateway-key-file", shell_output("#{bin}/pi-shared setup --help")
     assert_match "Direct external gateway", shell_output(
@@ -102,6 +104,11 @@ class PiShared < Formula
       "--gateway-url http://100.100.1.2:9111 --allow-private-http --gateway-key-file #{testpath}/missing.key"
     )
     refute_path_exists testpath/".config/pi-shared/setup.json"
+    update_output = shell_output("#{bin}/pi update 2>&1", 1)
+    assert_match "pi update: running pi-shared update", update_output
+    assert_match "No safe setup receipt found", update_output
+    refute_path_exists testpath/".config/pi-shared/setup.json"
+    assert_match "--extensions", shell_output("#{bin}/pi update --help")
     assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --help")
     assert_match "--require-omnigent", shell_output("#{bin}/pi-shared status --help")
     assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --plan --mode later --without-browser --with-omnigent")
