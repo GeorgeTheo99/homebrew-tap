@@ -73,8 +73,8 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.9** and its source SHA-256, with a locked Pi
-**0.85.1** runtime. Check the package CI above before relying on a new release.
+The formula pins pi-setup **v0.1.10** and its source SHA-256, with a locked Pi
+**0.87.1** runtime. Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
 ## What gets installed
@@ -186,6 +186,8 @@ package, re-executes the updated CLI, applies changed selected components,
 synchronizes shared dependencies, refreshes shortcuts and verifies everything.
 Unchanged services are not restarted; prerequisite changes or repair retries may
 reapply selected services. `pi-shared update --plan` is read-only.
+The runtime follows the published formula pin, not npm's latest release.
+Restart running Pi sessions after a runtime upgrade; `/reload` is not sufficient.
 
 Alias launches refresh changed local routing data without software upgrades,
 service restarts or model/provider calls. Manual model edits are protected rather
