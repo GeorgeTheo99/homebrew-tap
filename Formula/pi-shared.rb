@@ -4,9 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.9.tar.gz"
-  version "0.1.9"
-  sha256 "00f76c698028da3590abbc2a2f7901a54f3a4c9c8feda04f8b032011983875f7"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.10.tar.gz"
+  version "0.1.10"
+  sha256 "303f9deda8d5bd198a59d45e7b6b220e70441d432f7f9ae9be71d7def210e74e"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -94,7 +94,7 @@ class PiShared < Formula
     ENV["PI_OFFLINE"] = "1"
     assert_match "setup", shell_output("#{bin}/pi-shared --help")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
-    assert_match "0.1.9", shell_output("#{bin}/pi-shared --version")
+    assert_match "0.1.10", shell_output("#{bin}/pi-shared --version")
     assert_match "Direct-only policy", shell_output("#{bin}/pi-shared setup --plan --mode direct --without-browser")
     assert_match "--gateway-key-file", shell_output("#{bin}/pi-shared setup --help")
     assert_match "Direct external gateway", shell_output(
@@ -106,12 +106,12 @@ class PiShared < Formula
     assert_match "--require-omnigent", shell_output("#{bin}/pi-shared status --help")
     assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --plan --mode later --without-browser --with-omnigent")
     assert_match "Setup plan", shell_output("#{bin}/pi-shared setup --plan --mode later")
-    assert_match "0.85.1", shell_output("#{bin}/pi --version")
+    assert_match "0.87.1", shell_output("#{bin}/pi --version")
     assert_match "launcher support is not installed", shell_output("#{bin}/pi models 2>&1", 1)
     assert_match "launcher support is not installed", shell_output("#{bin}/pi models --json 2>&1", 1)
     assert_equal libexec/"runtime/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js",
                  (bin/"pi-upstream").realpath
-    assert_match "0.85.1", shell_output("#{bin}/pi-upstream --version")
+    assert_match "0.87.1", shell_output("#{bin}/pi-upstream --version")
     refute_path_exists testpath/".zshrc"
   end
 end
