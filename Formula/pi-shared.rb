@@ -96,7 +96,12 @@ class PiShared < Formula
     ENV["PI_OFFLINE"] = "1"
     assert_match "setup", shell_output("#{bin}/pi-shared --help")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
-    assert_match "0.1.11", shell_output("#{bin}/pi-shared --version")
+    setup_version = shell_output("#{bin}/pi-shared --version").strip
+    if build.head?
+      assert_match(/\Api-shared setup \d+\.\d+\.\d+\z/, setup_version)
+    else
+      assert_equal "pi-shared setup #{version}", setup_version
+    end
     assert_match "Direct-only policy", shell_output("#{bin}/pi-shared setup --plan --mode direct --without-browser")
     assert_match "--gateway-key-file", shell_output("#{bin}/pi-shared setup --help")
     assert_match "Direct external gateway", shell_output(
@@ -113,12 +118,15 @@ class PiShared < Formula
     assert_match "--require-omnigent", shell_output("#{bin}/pi-shared status --help")
     assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --plan --mode later --without-browser --with-omnigent")
     assert_match "Setup plan", shell_output("#{bin}/pi-shared setup --plan --mode later")
-    assert_match "0.87.1", shell_output("#{bin}/pi --version")
+    expected_pi = JSON.parse((libexec/"runtime/package.json").read).fetch("dependencies")
+                      .fetch("@earendil-works/pi-coding-agent")
+    assert_match(/\A\d+\.\d+\.\d+\z/, expected_pi)
+    assert_equal expected_pi, shell_output("#{bin}/pi --version").strip
     assert_match "launcher support is not installed", shell_output("#{bin}/pi models 2>&1", 1)
     assert_match "launcher support is not installed", shell_output("#{bin}/pi models --json 2>&1", 1)
     assert_equal libexec/"runtime/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js",
                  (bin/"pi-upstream").realpath
-    assert_match "0.87.1", shell_output("#{bin}/pi-upstream --version")
+    assert_equal expected_pi, shell_output("#{bin}/pi-upstream --version").strip
     refute_path_exists testpath/".zshrc"
   end
 end

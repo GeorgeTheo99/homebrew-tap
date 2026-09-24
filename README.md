@@ -190,8 +190,13 @@ package, re-executes the updated CLI, applies changed selected components,
 synchronizes shared dependencies, refreshes shortcuts and verifies everything.
 Unchanged services are not restarted; prerequisite changes or repair retries may
 reapply selected services. `pi-shared update --plan` is read-only.
-The runtime follows the published formula pin, not npm's latest release.
-Restart running Pi sessions after a runtime upgrade; `/reload` is not sufficient.
+The runtime follows the published formula pin, not npm's latest release. There
+is one supported runtime, with no alternate channel or automatic fallback.
+Runtime bumps must pass a fresh-cache full-lockset installation through the
+maintainer's required approved registry and runtime compatibility checks before
+publication; setup CLI releases can keep the same runtime pin. See the
+[runtime promotion policy](https://github.com/GeorgeTheo99/pi-setup/blob/main/docs/homebrew.md#runtime-promotion-policy).
+Restart running Pi sessions after any runtime change; `/reload` is not sufficient.
 
 Alias launches refresh changed local routing data without software upgrades,
 service restarts or model/provider calls. Manual model edits are protected rather
