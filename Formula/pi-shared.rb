@@ -4,9 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.12.tar.gz"
-  version "0.1.12"
-  sha256 "fe0a2890de96f6fb87a5789556451f309004290abaf4a14fc29676d584a2bf3e"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.13.tar.gz"
+  version "0.1.13"
+  sha256 "f4cf3f3f67a3692c085e120a6e091802fafab111cd5b224a725cbd079c12742a"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -81,7 +81,13 @@ class PiShared < Formula
 
       Setup can modify HOME and invoke independent module installers. Brew
       upgrade/uninstall does not update/delete those checkouts or stop their
-      services. Manage them with pi-shared setup or their own operator tools.
+      services. Before removing the package, review and apply user setup teardown:
+        pi-shared uninstall --plan
+        pi-shared uninstall --yes
+      Add --archive-config to detach Pi gateway model entries for a mode change.
+      Teardown archives changed files privately, stops recorded shared services
+      for all their clients, and preserves credentials, sessions, checkouts and
+      gateway source configuration. See docs/uninstall.md for retained state.
       Use pi-shared update or bare pi update for the saved installation
       (including its owned Homebrew runtime). Explicit update options keep
       stock behavior; pi update --self cannot update this runtime.
@@ -115,6 +121,8 @@ class PiShared < Formula
     refute_path_exists testpath/".config/pi-shared/setup.json"
     assert_match "--extensions", shell_output("#{bin}/pi update --help")
     assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --help")
+    assert_match "--archive-config", shell_output("#{bin}/pi-shared uninstall --help")
+    assert_match "No managed setup receipt", shell_output("#{bin}/pi-shared uninstall --plan")
     assert_match "--require-omnigent", shell_output("#{bin}/pi-shared status --help")
     assert_match "--with-omnigent", shell_output("#{bin}/pi-shared setup --plan --mode later --without-browser --with-omnigent")
     assert_match "Setup plan", shell_output("#{bin}/pi-shared setup --plan --mode later")
