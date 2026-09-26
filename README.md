@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.18** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.19** and its source SHA-256, with a locked Pi
 **0.85.1** runtime validated through the maintainer's required approved registry.
 Upgrading from packages 0.1.10 or 0.1.11 intentionally replaces Pi 0.87.1 with
 0.85.1; the newer setup CLI features remain available. Check the package CI above
@@ -268,7 +268,9 @@ extracts, executes, installs or publishes. A checksum is not provenance or
 compatibility proof: inspect the actual source and test it independently.
 
 The macOS workflow installs this exact committed tap checkout, chooses stable
-or HEAD according to its formula, and runs `brew test`. A real 24×80 terminal
+or HEAD according to its formula, and runs `brew test`. It verifies the installed
+`pi-shared -h` capability overview and all 12 preview-first recipes in
+`pi-shared setup -h`, each with an empty HOME before any service setup. A real 24×80 terminal
 smoke checks CLI-only confirmation, keyboard-guided navigation, read-only plans,
 and cancellation without provisioning. It exercises native
 direct-only setup with a custom saved profile and unchanged native auth/models,

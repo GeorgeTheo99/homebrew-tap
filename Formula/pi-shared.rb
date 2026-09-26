@@ -4,9 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.18.tar.gz"
-  version "0.1.18"
-  sha256 "a38df4722e8a3a987818313fd4774273805f83c598b30e3d5744a5109feb6a27"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.19.tar.gz"
+  version "0.1.19"
+  sha256 "80521fffebea120caa1689a25c1e53a632533c35a784a6e331325dad8e9385b1"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -67,8 +67,9 @@ class PiShared < Formula
       Installation only packages Pi and the setup orchestrator. No profiles,
       shell configuration, services, credentials, or models are provisioned.
       Review and run setup explicitly:
-        pi-shared setup --help
-        pi-shared setup --plan --mode later
+        pi-shared -h
+        pi-shared setup -h
+        pi-shared setup --plan
         pi-shared setup
 
       Setup is CLI-first: flags and saved/default choices, then one approval.
@@ -107,7 +108,8 @@ class PiShared < Formula
 
   test do
     ENV["PI_OFFLINE"] = "1"
-    assert_match "setup", shell_output("#{bin}/pi-shared --help")
+    assert_match "Setup paths", shell_output("#{bin}/pi-shared -h")
+    assert_match "Preview and approval", shell_output("#{bin}/pi-shared setup -h")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
     assert_match "--guided", shell_output("#{bin}/pi-shared setup --help")
     assert_match "Setup plan", shell_output("#{bin}/pi-shared setup --guided --plan --without-browser")
