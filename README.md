@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.13** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.16** and its source SHA-256, with a locked Pi
 **0.85.1** runtime validated through the maintainer's required approved registry.
 Upgrading from packages 0.1.10 or 0.1.11 intentionally replaces Pi 0.87.1 with
 0.85.1; the newer setup CLI features remain available. Check the package CI above
@@ -94,8 +94,11 @@ Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
 Only explicit `pi-shared setup` clones selected modules, installs their locked
 dependencies, wires profiles and CLI configuration, starts their services, and runs
-module checks. It shows a plan and asks before applying it. EOF/Ctrl-C cancels;
-completed work is not rolled back. Cloud credentials remain yours to configure.
+module checks. Package **0.1.16+** first asks for unspecified model, browser,
+search, and optional integration choices, then shows the complete plan for
+approval. Saved choices can be retained; explicit flags skip their questions.
+EOF/Ctrl-C cancels; completed work is not rolled back. Cloud credentials remain
+yours to configure.
 
 | Setup mode | Modules |
 |---|---|
@@ -138,9 +141,23 @@ This adds native-Pi prerequisite/package checks only. It does not install
 Omnigent, launch sessions, or verify inference; see the
 [compatibility contract](https://github.com/GeorgeTheo99/pi-setup/blob/main/docs/omnigent-compatibility.md).
 
-`--without-browser` omits browser-worker and Chromium; `--with-search` adds the
-search broker after its Brave key is provisioned. Optional private-app browser
-binaries and PowerPoint preview tools are separate prerequisites.
+Interactive setup asks whether to install browser-worker/Chromium; flags
+`--with-browser` / `--without-browser` select explicitly. Search choices are:
+
+- **Local:** install the Brave search broker, collecting a private key file or
+  hidden key input before approval; no pre-clone required.
+- **Existing:** configure a compatible MCP endpoint and optional private bearer
+  token. It must expose `web_search` and `web_fetch`; arbitrary MCP servers are
+  not interchangeable. Authentication requires HTTPS or loopback HTTP.
+- **Skip:** leave existing search routing and services alone.
+
+Use `--search local --brave-key-file /absolute/private.key` or
+`--search existing --search-url https://search.example/mcp` for explicit choices.
+Add `--search-key-file /absolute/broker.key` when needed. Preview with `--plan`,
+which never reads credential files or connects to servers. Keys stay out of
+plans/receipts; writes occur only after approval. Provider searches are not tested.
+`--with-search` remains compatible with older pre-provisioned installations.
+Optional private-app browser binaries and PowerPoint tools remain separate.
 
 After setup, use `pi models`, `pi openai`, or `pi <model-alias>`.
 Package **0.1.9+** and the updated shared module display grouped model aliases;

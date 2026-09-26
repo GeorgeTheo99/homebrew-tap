@@ -4,9 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.15.tar.gz"
-  version "0.1.15"
-  sha256 "fe0b10e9c6c16f76eb198dc9f47615d6e3d5fc3c537d229cc03c1ec08725a4b7"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.16.tar.gz"
+  version "0.1.16"
+  sha256 "682928c798932e6c657d96cd14b0cc81e233e7521c13136d4a1997a023147f8e"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -71,7 +71,10 @@ class PiShared < Formula
         pi-shared setup --plan --mode later
         pi-shared setup
 
-      Direct native Pi providers are the default. Add a gateway alongside them:
+      Interactive setup asks about models, browser, search, and optional tools.
+      Search can install a local Brave broker with secure key entry or connect
+      to an existing compatible MCP endpoint. No keys are saved before approval.
+      Direct native Pi providers are the noninteractive default. Add a gateway:
         pi-shared setup --with model-gateway
       For local Apple Silicon models, choose oMLX during setup, or run:
         pi-shared setup --local
@@ -102,6 +105,16 @@ class PiShared < Formula
     ENV["PI_OFFLINE"] = "1"
     assert_match "setup", shell_output("#{bin}/pi-shared --help")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
+    assert_match "--search-key-file", shell_output("#{bin}/pi-shared setup --help")
+    assert_match "Search: existing", shell_output(
+      "#{bin}/pi-shared setup --plan --search existing --search-url https://search.example/mcp " \
+      "--search-key-file #{testpath}/missing-search.key --without-browser"
+    )
+    assert_match "Search: local", shell_output(
+      "#{bin}/pi-shared setup --plan --search local --brave-key-file #{testpath}/missing-brave.key --without-browser"
+    )
+    refute_path_exists testpath/".pi/research/config.json"
+    refute_path_exists testpath/".local/share/pi-shared/search"
     assert_match "Model access: direct", shell_output("#{bin}/pi-shared setup --plan --without-browser")
     assert_match "Model access: direct, model-gateway",
                  shell_output("#{bin}/pi-shared setup --with direct --with model-gateway --plan --without-browser")

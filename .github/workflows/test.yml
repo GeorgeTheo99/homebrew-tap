@@ -43,6 +43,8 @@ jobs:
           fi
       - name: Exercise installed CLI and packaging contract
         run: brew test pi-shared-ci/test/pi-shared
+      - name: Smoke interactive questionnaire cancellation without provisioning
+        run: python3 -B tests/smoke_questionnaire.py
       - name: Smoke native direct-only setup and saved lifecycle
         run: python3 -B tests/smoke_direct.py
       - name: Smoke direct remote gateway setup and offline lifecycle
