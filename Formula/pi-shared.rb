@@ -4,9 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.19.tar.gz"
-  version "0.1.19"
-  sha256 "80521fffebea120caa1689a25c1e53a632533c35a784a6e331325dad8e9385b1"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.20.tar.gz"
+  version "0.1.20"
+  sha256 "a00bdd91aa85176306c77ffe1c271ce0f774fce7ad6ed8e876e89e0936c55c61"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"

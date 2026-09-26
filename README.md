@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.19** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.20** and its source SHA-256, with a locked Pi
 **0.85.1** runtime validated through the maintainer's required approved registry.
 Upgrading from packages 0.1.10 or 0.1.11 intentionally replaces Pi 0.87.1 with
 0.85.1; the newer setup CLI features remain available. Check the package CI above
@@ -155,8 +155,12 @@ selections. `--guided` asks about browser installation; flags `--with-browser` /
 - **Local:** install the Brave search broker, collecting a private key file or
   hidden key input before approval; no pre-clone required.
 - **Existing:** configure a compatible MCP endpoint and optional private bearer
-  token. It must expose `web_search` and `web_fetch`; arbitrary MCP servers are
-  not interchangeable. Authentication requires HTTPS or loopback HTTP.
+  token. It must expose `web_search(query, num_results)` and
+  `web_fetch(url, max_chars)` through direct JSON MCP. Version 0.1.20 checks
+  inventory and basic argument schemas during approved setup, before saving
+  search config; redirects, SSE and session-required inventories fail clearly.
+  Actual tool calls/provider readiness are not tested. Authentication requires
+  HTTPS or loopback HTTP.
 - **Skip:** leave existing search routing and services alone.
 
 Use `--search local --brave-key-file /absolute/private.key` or
