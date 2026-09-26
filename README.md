@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.17** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.18** and its source SHA-256, with a locked Pi
 **0.85.1** runtime validated through the maintainer's required approved registry.
 Upgrading from packages 0.1.10 or 0.1.11 intentionally replaces Pi 0.87.1 with
 0.85.1; the newer setup CLI features remain available. Check the package CI above
@@ -95,8 +95,9 @@ Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 Only explicit `pi-shared setup` clones selected modules, installs their locked
 dependencies, wires profiles and CLI configuration, starts their services, and runs
 module checks. Package **0.1.17+** is CLI-first: flags, saved choices and defaults
-resolve a plan, followed by one approval. Missing required inputs fail with
-flag guidance. `pi-shared setup --guided` opts into arrow-key menus, Space/Enter
+resolve a plan, followed by one approval. Package **0.1.18+** adds a focused
+remote flow: endpoint → credential-file path → confirmation, with private HTTP
+consent when needed. Other missing inputs fail with flag guidance. `pi-shared setup --guided` opts into arrow-key menus, Space/Enter
 checklists, and a scrollable plan defaulting to Cancel. No typed option names or
 repeat-until-keep loop. `--guided --plan` stays read-only and opens no menus;
 `--guided --yes` is rejected. EOF/Ctrl-C cancels; completed work is not rolled
@@ -117,13 +118,17 @@ Pi (`/login`, `/model`); `pi openai` is the existing Codex subscription shortcut
 not API-key billing. Existing gateway selections are not migrated automatically.
 See [direct providers](https://github.com/GeorgeTheo99/pi-shared/blob/main/docs/direct-providers.md).
 
-For an existing server gateway, choose **Existing gateway** with `--guided` or run:
+For an existing server gateway, supply the endpoint directly or start its focused
+prompt flow; native providers remain available and unrelated menus are skipped:
 
 ```sh
-pi-shared setup --mode existing-gateway \
-  --gateway-url https://server.example-tailnet.ts.net \
-  --gateway-key-file "$HOME/.config/pi-shared/gateway.key"
+pi-shared setup --gateway-url https://server.example-tailnet.ts.net/model-gateway
+pi-shared setup --with existing-gateway # endpoint → credential-file → confirmation
 ```
+
+Safe reverse-proxy prefixes are preserved. Use `--gateway-key-file` to supply
+the private credential-file path explicitly; `--yes`, `--plan`, and non-TTY
+runs never prompt for missing values.
 
 Use an already-provisioned client key in an owned, non-symlinked `0600` file.
 Trusted private/Tailscale HTTP requires a numeric private IP and explicit

@@ -95,6 +95,18 @@ def main():
     if "Model connection:" in output or "Cancelled; no installation changes made." not in output:
         raise RuntimeError("Default setup must show only the plan and approval, not component menus")
 
+    output = terminal_case(executable, ["--with", "existing-gateway"], [
+        ("Existing gateway base URL", b"https://gateway.example/model-gateway\r"),
+        ("Absolute path", b"/private/client.key\r"),
+        ("Apply this plan? [y/N]", b"n\r"),
+    ], 0)
+    if any(prompt in output for prompt in ("Model connection:", "Public browser automation:",
+                                           "Optional Omnigent", "Optional independent recovery",
+                                           "Web search and page retrieval")):
+        raise RuntimeError("Focused gateway setup asked unrelated questions")
+    if "https://gateway.example/model-gateway" not in output:
+        raise RuntimeError("Focused gateway setup lost the reverse-proxy prefix")
+
     down = b"\x1bOB"  # xterm application-mode Down, with curses keypad enabled.
     output = terminal_case(executable, ["--guided"], [
         ("Model connection", down * 5 + b"\r"),

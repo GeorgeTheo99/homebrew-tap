@@ -20,7 +20,7 @@ def main():
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
             requests.append(self.path)
-            if self.path != "/v1/models/canonical" or self.headers.get("Authorization") != "Bearer " + token:
+            if self.path != "/model-gateway/v1/models/canonical" or self.headers.get("Authorization") != "Bearer " + token:
                 self.send_error(403)
                 return
             self.send_response(200)
@@ -44,20 +44,22 @@ def main():
             key = home / "client.key"
             key.write_text(token + "\n")
             key.chmod(0o600)
-            url = f"http://127.0.0.1:{server.server_port}"
+            url = f"http://127.0.0.1:{server.server_port}/model-gateway"
 
             def run(*command):
                 subprocess.run(command, env=env, check=True, timeout=600)
 
-            run("pi-shared", "setup", "--mode", "existing-gateway", "--without-browser", "--yes",
+            run("pi-shared", "setup", "--without-browser", "--yes",
                 "--gateway-url", url, "--gateway-key-file", str(key), "--allow-private-http")
             receipt_path = home / ".config/pi-shared/setup.json"
             receipt = json.loads(receipt_path.read_text())
             assert receipt["status"] == "module-checks-passed"
             assert receipt["modules"] == ["pi-shared"]
             assert receipt["services"] == {}
+            assert receipt["model_access"] == ["direct", "existing-gateway"]
             assert not (Path(receipt["code_root"]) / "model-gateway").exists()
             launcher = json.loads(Path(receipt["cli_file"]).read_text())
+            assert launcher["routes"]["openai"]["gateway"] is False
             routes = {alias: row for alias, row in launcher["routes"].items() if row["gateway"]}
             assert len(routes) == 1
             alias, route = next(iter(routes.items()))
@@ -70,11 +72,11 @@ def main():
             assert provider["apiKey"].startswith("!")
             for path in (receipt_path, Path(receipt["cli_file"]), models_path):
                 assert token not in path.read_text()
-            assert requests == ["/v1/models/canonical"]
+            assert requests == ["/model-gateway/v1/models/canonical"]
             # With the server still live, count any accidental catalog reads.
             run("pi-shared", "status")
             run("pi-shared", "update", "--modules-only")
-            assert requests == ["/v1/models/canonical"]
+            assert requests == ["/model-gateway/v1/models/canonical"]
             # Also prove lifecycle succeeds when the server no longer exists.
             server.shutdown()
             thread.join()
@@ -94,7 +96,7 @@ def main():
             run("pi-shared", "update", "--modules-only")
             run("pi-shared", "status")
             assert json.loads(receipt_path.read_text())["external_gateway"] == receipt["external_gateway"]
-            assert requests == ["/v1/models/canonical"]
+            assert requests == ["/model-gateway/v1/models/canonical"]
             assert not (home / ".zshrc").exists()
             print("PASS: installed direct-gateway setup, model listing/default and offline update/status")
     finally:
