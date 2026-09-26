@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.16** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.17** and its source SHA-256, with a locked Pi
 **0.85.1** runtime validated through the maintainer's required approved registry.
 Upgrading from packages 0.1.10 or 0.1.11 intentionally replaces Pi 0.87.1 with
 0.85.1; the newer setup CLI features remain available. Check the package CI above
@@ -94,11 +94,13 @@ Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
 Only explicit `pi-shared setup` clones selected modules, installs their locked
 dependencies, wires profiles and CLI configuration, starts their services, and runs
-module checks. Package **0.1.16+** first asks for unspecified model, browser,
-search, and optional integration choices, then shows the complete plan for
-approval. Saved choices can be retained; explicit flags skip their questions.
-EOF/Ctrl-C cancels; completed work is not rolled back. Cloud credentials remain
-yours to configure.
+module checks. Package **0.1.17+** is CLI-first: flags, saved choices and defaults
+resolve a plan, followed by one approval. Missing required inputs fail with
+flag guidance. `pi-shared setup --guided` opts into arrow-key menus, Space/Enter
+checklists, and a scrollable plan defaulting to Cancel. No typed option names or
+repeat-until-keep loop. `--guided --plan` stays read-only and opens no menus;
+`--guided --yes` is rejected. EOF/Ctrl-C cancels; completed work is not rolled
+back. Cloud credentials remain yours to configure.
 
 | Setup mode | Modules |
 |---|---|
@@ -115,7 +117,7 @@ Pi (`/login`, `/model`); `pi openai` is the existing Codex subscription shortcut
 not API-key billing. Existing gateway selections are not migrated automatically.
 See [direct providers](https://github.com/GeorgeTheo99/pi-shared/blob/main/docs/direct-providers.md).
 
-For an existing server gateway, choose **Existing gateway** during setup or run:
+For an existing server gateway, choose **Existing gateway** with `--guided` or run:
 
 ```sh
 pi-shared setup --mode existing-gateway \
@@ -141,8 +143,9 @@ This adds native-Pi prerequisite/package checks only. It does not install
 Omnigent, launch sessions, or verify inference; see the
 [compatibility contract](https://github.com/GeorgeTheo99/pi-setup/blob/main/docs/omnigent-compatibility.md).
 
-Interactive setup asks whether to install browser-worker/Chromium; flags
-`--with-browser` / `--without-browser` select explicitly. Search choices are:
+Fresh defaults include browser-worker/Chromium and skip search; reruns keep saved
+selections. `--guided` asks about browser installation; flags `--with-browser` /
+`--without-browser` select explicitly. Search choices are:
 
 - **Local:** install the Brave search broker, collecting a private key file or
   hidden key input before approval; no pre-clone required.
@@ -179,11 +182,12 @@ deliberately—never use `brew link --overwrite` blindly.
 ## Local models and recovery
 
 ```sh
-pi-shared setup --local
+pi-shared setup --local --guided
 ```
 
 Choose existing local oMLX discovery, a **new** Homebrew oMLX installation
-(Apple Silicon/macOS 15+), or instructions for later. Setup does not replace an
+(Apple Silicon/macOS 15+), or instructions for later. Without `--guided`, use `--omlx existing|install|guide`;
+the default is saved selection or guidance. Setup does not replace an
 existing oMLX service manager. Review model download size and memory needs in
 oMLX before downloading; **no LLM weights are downloaded by pi-shared**.
 Discovery is not inference: local Pi/gateway routing and an actual model smoke
@@ -259,7 +263,9 @@ extracts, executes, installs or publishes. A checksum is not provenance or
 compatibility proof: inspect the actual source and test it independently.
 
 The macOS workflow installs this exact committed tap checkout, chooses stable
-or HEAD according to its formula, and runs `brew test`. It exercises native
+or HEAD according to its formula, and runs `brew test`. A real 24×80 terminal
+smoke checks CLI-only confirmation, keyboard-guided navigation, read-only plans,
+and cancellation without provisioning. It exercises native
 direct-only setup with a custom saved profile and unchanged native auth/models,
 then verifies rerun/update/status without gateway services. It also exercises direct
 remote setup against an authenticated fake loopback gateway in disposable HOME,

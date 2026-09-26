@@ -4,9 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.16.tar.gz"
-  version "0.1.16"
-  sha256 "682928c798932e6c657d96cd14b0cc81e233e7521c13136d4a1997a023147f8e"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.17.tar.gz"
+  version "0.1.17"
+  sha256 "f468fc12da4602bc19ac0c8454a39231e72fd4b548c6e9521c063d83d29fc3c2"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -71,13 +71,17 @@ class PiShared < Formula
         pi-shared setup --plan --mode later
         pi-shared setup
 
-      Interactive setup asks about models, browser, search, and optional tools.
-      Search can install a local Brave broker with secure key entry or connect
-      to an existing compatible MCP endpoint. No keys are saved before approval.
-      Direct native Pi providers are the noninteractive default. Add a gateway:
+      Setup is CLI-first: flags and saved/default choices, then one approval.
+      Optional arrow-key menus (Space toggles, Enter continues):
+        pi-shared setup --guided
+      Search can install a local Brave broker with private key-file input or
+      connect to an existing compatible MCP endpoint. Guided mode also offers
+      hidden key entry. No keys are saved before approval.
+      Fresh defaults: direct providers, browser enabled, search skipped.
+      Use --without-browser to omit Chromium. Add a gateway:
         pi-shared setup --with model-gateway
-      For local Apple Silicon models, choose oMLX during setup, or run:
-        pi-shared setup --local
+      For local Apple Silicon model choices, run:
+        pi-shared setup --local --guided
       To connect directly to an existing server gateway (including Tailscale),
       use setup --with existing-gateway; no local gateway service is installed.
       pi-fallback is a separate optional recovery prototype, not a dependency.
@@ -105,6 +109,9 @@ class PiShared < Formula
     ENV["PI_OFFLINE"] = "1"
     assert_match "setup", shell_output("#{bin}/pi-shared --help")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
+    assert_match "--guided", shell_output("#{bin}/pi-shared setup --help")
+    assert_match "Setup plan", shell_output("#{bin}/pi-shared setup --guided --plan --without-browser")
+    assert_match "--guided cannot be combined with --yes", shell_output("#{bin}/pi-shared setup --guided --yes 2>&1", 1)
     assert_match "--search-key-file", shell_output("#{bin}/pi-shared setup --help")
     assert_match "Search: existing", shell_output(
       "#{bin}/pi-shared setup --plan --search existing --search-url https://search.example/mcp " \
