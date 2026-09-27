@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.23** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.24** and its source SHA-256, with a locked Pi
 **0.85.1** runtime validated through the maintainer's required approved registry.
 Upgrading from packages 0.1.10 or 0.1.11 intentionally replaces Pi 0.87.1 with
 0.85.1; the newer setup CLI features remain available. Check the package CI above
@@ -114,8 +114,10 @@ back. Cloud credentials remain yours to configure.
 
 For native Pi subscriptions/API keys without model-gateway, choose **Direct** or
 run `pi-shared setup --mode direct`. Authentication and model selection remain in
-Pi (`/login`, `/model`); `pi openai` is the existing Codex subscription shortcut,
-not API-key billing. Existing gateway selections are not migrated automatically.
+Pi (`/login`, `/model`); `pi openai` is the Codex subscription shortcut and
+uses the saved Codex model default, not API-key billing. Missing Codex context
+overrides are set to the reviewed 872K ceiling on setup/update; existing overrides
+and direct OpenAI API models remain unchanged. Existing gateway selections are not migrated automatically.
 See [direct providers](https://github.com/GeorgeTheo99/pi-shared/blob/main/docs/direct-providers.md).
 
 For an existing server gateway, supply the endpoint directly or start its focused
@@ -302,7 +304,8 @@ or HEAD according to its formula, and runs `brew test`. It verifies the installe
 `pi-shared setup -h`, each with an empty HOME before any service setup. A real 24×80 terminal
 smoke checks CLI-only confirmation, keyboard-guided navigation, read-only plans,
 and cancellation without provisioning. It exercises native
-direct-only setup with a custom saved profile and unchanged native auth/models,
+direct-only setup with a custom saved profile, unchanged native auth and only
+missing Codex max-context overrides added to native models,
 then verifies rerun/update/status without gateway services. It also exercises direct
 remote setup against an authenticated fake loopback gateway in disposable HOME,
 then stops that server and verifies offline update/status. No real provider is
