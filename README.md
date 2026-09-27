@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.24** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.25** and its source SHA-256, with a locked Pi
 **0.85.1** runtime validated through the maintainer's required approved registry.
 Upgrading from packages 0.1.10 or 0.1.11 intentionally replaces Pi 0.87.1 with
 0.85.1; the newer setup CLI features remain available. Check the package CI above
@@ -117,7 +117,9 @@ run `pi-shared setup --mode direct`. Authentication and model selection remain i
 Pi (`/login`, `/model`); `pi openai` is the Codex subscription shortcut and
 uses the saved Codex model default, not API-key billing. Missing Codex context
 overrides are set to the reviewed 872K ceiling on setup/update; existing overrides
-and direct OpenAI API models remain unchanged. Existing gateway selections are not migrated automatically.
+and direct OpenAI API models remain unchanged. To change the saved Codex context
+for future sessions, run `pi openai --set-context=standard|max` (272K or 872K
+for all six reviewed models); subsequent updates preserve this choice. Existing gateway selections are not migrated automatically.
 See [direct providers](https://github.com/GeorgeTheo99/pi-shared/blob/main/docs/direct-providers.md).
 
 For an existing server gateway, supply the endpoint directly or start its focused
