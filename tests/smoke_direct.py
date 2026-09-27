@@ -55,8 +55,13 @@ def main():
         run("pi", "openai", "--default")
         expected_default = json.loads((profile / "settings.json").read_text())
         assert expected_default["defaultProvider"] == "openai-codex"
+        expected_default["defaultModel"] = "gpt-6-sol"
+        (profile / "settings.json").write_text(json.dumps(expected_default))
         listing = json.loads(subprocess.check_output(["pi", "models", "--json"], env=env, text=True))
         assert listing["models"][0]["default"] is True
+        assert listing["models"][0]["model"] == "gpt-6-sol"
+        assert "openai\topenai-codex/gpt-6-sol" in subprocess.check_output(
+            ["pi", "--launcher-list"], env=env, text=True)
         assert listing["savedDefault"]["profile"] == str(profile)
         run("pi-shared", "setup", "--mode", "direct", "--without-browser", "--yes")
         run("pi-shared", "status")
@@ -72,13 +77,18 @@ def main():
             "--direct-only", "--shared-dir", str(Path(after["code_root"]) / "pi-shared"), "--direct-launchers"]
         assert all(not row["gateway"] for row in launcher["routes"].values())
         assert json.loads((profile / "settings.json").read_text()) == expected_default
-        for name, content in native.items():
-            assert (profile / name).read_text() == content
+        assert (profile / "auth.json").read_text() == native["auth.json"]
+        models = json.loads((profile / "models.json").read_text())
+        assert set(models["providers"]) == {"openai-codex"}
+        overrides = models["providers"]["openai-codex"]["modelOverrides"]
+        assert set(overrides) == {"gpt-5.6-luna", "gpt-5.6-sol", "gpt-5.6-terra",
+                                  "gpt-6-astra", "gpt-6-luna", "gpt-6-sol"}
+        assert all(value == {"contextWindow": 872000} for value in overrides.values())
         assert aliases.read_text() == "INVALID GATEWAY CATALOG MUST NOT BE READ"
         for path in (home / ".zshrc", home / ".pi-omlx", home / "Library/LaunchAgents",
                      home / ".pi/agent/settings.json", Path(after["code_root"]) / "model-gateway"):
             assert not path.exists(), path
-        print("PASS: installed direct-only setup, custom native profile/default, rerun, update and status; native auth/models unchanged")
+        print("PASS: direct-only setup/update, saved Sol shortcut, native auth preserved, Codex contexts 872K")
 
 
 if __name__ == "__main__":
