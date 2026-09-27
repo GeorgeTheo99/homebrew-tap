@@ -1,12 +1,13 @@
 require "uri"
+require "shellwords"
 
 class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.21.tar.gz"
-  version "0.1.21"
-  sha256 "ad11716abbf88395ccadecd573184b9d77ba2193421cf353b0374c89ebbb6e50"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.22.tar.gz"
+  version "0.1.22"
+  sha256 "384760645f900dc47343cd308bd3132548da7c2c349ff10b3037262df8777928"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -80,7 +81,10 @@ class PiShared < Formula
       hidden key entry. No keys are saved before approval.
       Optional Mac computer use is separate from those defaults:
         pi-shared peekaboo plan --json
-      In Pi, /setup peekaboo offers preview, approval and CLI/permission checks.
+      In Pi, /setup offers search, browsers, MCP, development, documents,
+      Apple prerequisites, private knowledge, models, diagnostics and Peekaboo.
+      Missing project/KB configuration requires exact-plan approval; broader
+      installers remain explicit terminal handoffs. /setup never grants trust.
       Peekaboo installation and macOS permission grants are never automatic.
       Fresh defaults: direct providers, browser enabled, search skipped.
       Use --without-browser to omit Chromium. Add a gateway:
@@ -122,6 +126,27 @@ class PiShared < Formula
     assert_equal "not-tested", peekaboo_plan.fetch("evidence").fetch("runnable")
     refute_path_exists testpath/".config/mcp/mcp.json"
     refute_path_exists testpath/".local/share/peekaboo"
+    assert_match "--expected-plan", shell_output("#{bin}/pi-shared capability --help")
+    %w[project profile shared].each { |name| (testpath/"capabilities"/name).mkpath }
+    metadata = testpath/"capabilities/shared/knowledge/software-engineering"
+    (metadata/"corpus").mkpath
+    (metadata/"sources.json").write "{}\n"
+    (metadata/"documents.json").write "{}\n"
+    (metadata/"corpus/source-cards.md").write "# Synthetic metadata\n"
+    context = ["--json", "--project", (testpath/"capabilities/project").realpath.to_s,
+               "--agent-dir", (testpath/"capabilities/profile").realpath.to_s,
+               "--shared-root", (testpath/"capabilities/shared").realpath.to_s,
+               "--node-executable", (Formula["node"].opt_bin/"node").realpath.to_s]
+    %w[search browser mcp development documents apple knowledge models diagnostics].each do |component|
+      preview = JSON.parse(shell_output(([bin/"pi-shared", "capability", component, "plan"] + context).map(&:to_s).shelljoin))
+      assert_equal 1, preview.fetch("schemaVersion")
+      assert_equal component, preview.fetch("component")
+      assert_equal "plan", preview.fetch("action")
+      assert_equal true, preview.fetch("ok")
+      refute_equal "verified", preview.fetch("status")
+    end
+    refute_path_exists testpath/"capabilities/project/.pi"
+    refute_path_exists testpath/".pi/knowledge/software-engineering"
     assert_match "Preview and approval", shell_output("#{bin}/pi-shared setup -h")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
     assert_match "--guided", shell_output("#{bin}/pi-shared setup --help")

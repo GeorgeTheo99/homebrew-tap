@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.21** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.22** and its source SHA-256, with a locked Pi
 **0.85.1** runtime validated through the maintainer's required approved registry.
 Upgrading from packages 0.1.10 or 0.1.11 intentionally replaces Pi 0.87.1 with
 0.85.1; the newer setup CLI features remain available. Check the package CI above
@@ -180,6 +180,15 @@ The optional Apple Silicon compatibility installer is pinned to signed Peekaboo
 4.5.0 with explicit older-version warnings; no automatic downgrade or OS permission
 grant is performed. CLI/permission checks are not MCP or desktop verification.
 See the [Peekaboo setup contract](https://github.com/GeorgeTheo99/pi-setup/blob/main/docs/peekaboo.md).
+
+Package **0.1.22+** and updated shared modules expand `/setup` to ten entries:
+search/research, browsers, MCP, project development tools, document prerequisites,
+Apple prerequisites, a private knowledge base, models, diagnostics and Peekaboo.
+Plans show evidence and scope first. Exact-plan approval can create missing
+project configs or a new private KB metadata layout; existing files and trust are
+preserved. Broader installers and indexing remain explicit terminal handoffs.
+Private books are not bundled or uploaded. See the
+[capability contract](https://github.com/GeorgeTheo99/pi-setup/blob/main/docs/capabilities.md).
 
 After setup, use `pi models`, `pi openai`, or `pi <model-alias>`.
 Package **0.1.9+** and the updated shared module display grouped model aliases;
