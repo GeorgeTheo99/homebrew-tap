@@ -63,6 +63,9 @@ def main():
         assert "openai\topenai-codex/gpt-6-sol" in subprocess.check_output(
             ["pi", "--launcher-list"], env=env, text=True)
         assert listing["savedDefault"]["profile"] == str(profile)
+        run("pi", "openai", "--set-context=standard")
+        selected = json.loads((profile / "models.json").read_text())
+        assert {v["contextWindow"] for v in selected["providers"]["openai-codex"]["modelOverrides"].values()} == {272000}
         run("pi-shared", "setup", "--mode", "direct", "--without-browser", "--yes")
         run("pi-shared", "status")
         run("pi-shared", "update", "--modules-only")
@@ -83,12 +86,16 @@ def main():
         overrides = models["providers"]["openai-codex"]["modelOverrides"]
         assert set(overrides) == {"gpt-5.6-luna", "gpt-5.6-sol", "gpt-5.6-terra",
                                   "gpt-6-astra", "gpt-6-luna", "gpt-6-sol"}
-        assert all(value == {"contextWindow": 872000} for value in overrides.values())
+        assert all(value == {"contextWindow": 272000} for value in overrides.values())
+        run("pi", "openai", "--set-context=max")
+        restored = json.loads((profile / "models.json").read_text())
+        assert all(value == {"contextWindow": 872000} for value in
+                   restored["providers"]["openai-codex"]["modelOverrides"].values())
         assert aliases.read_text() == "INVALID GATEWAY CATALOG MUST NOT BE READ"
         for path in (home / ".zshrc", home / ".pi-omlx", home / "Library/LaunchAgents",
                      home / ".pi/agent/settings.json", Path(after["code_root"]) / "model-gateway"):
             assert not path.exists(), path
-        print("PASS: direct-only setup/update, saved Sol shortcut, native auth preserved, Codex contexts 872K")
+        print("PASS: direct-only setup/update, saved Sol, persistent 272K and 872K Codex modes, native auth preserved")
 
 
 if __name__ == "__main__":
