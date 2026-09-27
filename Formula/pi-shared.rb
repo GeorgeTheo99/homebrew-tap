@@ -4,9 +4,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.20.tar.gz"
-  version "0.1.20"
-  sha256 "a00bdd91aa85176306c77ffe1c271ce0f774fce7ad6ed8e876e89e0936c55c61"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.21.tar.gz"
+  version "0.1.21"
+  sha256 "ad11716abbf88395ccadecd573184b9d77ba2193421cf353b0374c89ebbb6e50"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -78,6 +78,10 @@ class PiShared < Formula
       Search can install a local Brave broker with private key-file input or
       connect to an existing compatible MCP endpoint. Guided mode also offers
       hidden key entry. No keys are saved before approval.
+      Optional Mac computer use is separate from those defaults:
+        pi-shared peekaboo plan --json
+      In Pi, /setup peekaboo offers preview, approval and CLI/permission checks.
+      Peekaboo installation and macOS permission grants are never automatic.
       Fresh defaults: direct providers, browser enabled, search skipped.
       Use --without-browser to omit Chromium. Add a gateway:
         pi-shared setup --with model-gateway
@@ -109,6 +113,15 @@ class PiShared < Formula
   test do
     ENV["PI_OFFLINE"] = "1"
     assert_match "Setup paths", shell_output("#{bin}/pi-shared -h")
+    assert_match "--expected-plan", shell_output("#{bin}/pi-shared peekaboo --help")
+    peekaboo_plan = JSON.parse(shell_output("#{bin}/pi-shared peekaboo plan --json"))
+    assert_equal 1, peekaboo_plan.fetch("schemaVersion")
+    assert_equal "peekaboo", peekaboo_plan.fetch("component")
+    assert_equal "not-tested", peekaboo_plan.fetch("evidence").fetch("desktop")
+    assert_equal "not-tested", peekaboo_plan.fetch("evidence").fetch("mcp")
+    assert_equal "not-tested", peekaboo_plan.fetch("evidence").fetch("runnable")
+    refute_path_exists testpath/".config/mcp/mcp.json"
+    refute_path_exists testpath/".local/share/peekaboo"
     assert_match "Preview and approval", shell_output("#{bin}/pi-shared setup -h")
     assert_match "--mode", shell_output("#{bin}/pi-shared setup --help")
     assert_match "--guided", shell_output("#{bin}/pi-shared setup --help")
