@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.22** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.23** and its source SHA-256, with a locked Pi
 **0.85.1** runtime validated through the maintainer's required approved registry.
 Upgrading from packages 0.1.10 or 0.1.11 intentionally replaces Pi 0.87.1 with
 0.85.1; the newer setup CLI features remain available. Check the package CI above
@@ -174,8 +174,14 @@ Optional private-app browser binaries and PowerPoint tools remain separate.
 Native Mac computer use is a separate opt-in in **0.1.21+**:
 `pi-shared peekaboo plan --json` previews the configuration; Pi's `/setup peekaboo`
 provides the guided front end when the updated shared module is loaded. Installation
-or configuration requires approval of an exact plan. The full Peekaboo MCP catalog
-is exposed through the existing adapter, not a new native computer-use wrapper.
+or configuration requires approval of an exact plan. Package **0.1.23+** adds
+schema-v2 selection of direct CLI or desktop-app Bridge permission ownership.
+Direct mode exposes the full catalog; the 4.5.0 Bridge compatibility mode disables
+only Peekaboo's broken `browser` tool and retains the other 25 tools. Pi's existing
+browser tools are unchanged. Both routes use the existing MCP adapter, not a new
+native computer-use wrapper. Recognized existing routes are preserved; conflicting
+entries are never silently migrated. Install/start the app and unlock the desktop
+manually before testing native actions.
 The optional Apple Silicon compatibility installer is pinned to signed Peekaboo
 4.5.0 with explicit older-version warnings; no automatic downgrade or OS permission
 grant is performed. CLI/permission checks are not MCP or desktop verification.

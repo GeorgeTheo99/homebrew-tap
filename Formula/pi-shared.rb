@@ -5,9 +5,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.22.tar.gz"
-  version "0.1.22"
-  sha256 "384760645f900dc47343cd308bd3132548da7c2c349ff10b3037262df8777928"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.23.tar.gz"
+  version "0.1.23"
+  sha256 "7f6614b867f2bbb10f9f03c589800b7093c64e913888cc4c7139f0f7d8df5680"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -119,11 +119,23 @@ class PiShared < Formula
     assert_match "Setup paths", shell_output("#{bin}/pi-shared -h")
     assert_match "--expected-plan", shell_output("#{bin}/pi-shared peekaboo --help")
     peekaboo_plan = JSON.parse(shell_output("#{bin}/pi-shared peekaboo plan --json"))
-    assert_equal 1, peekaboo_plan.fetch("schemaVersion")
+    assert_equal 2, peekaboo_plan.fetch("schemaVersion")
     assert_equal "peekaboo", peekaboo_plan.fetch("component")
     assert_equal "not-tested", peekaboo_plan.fetch("evidence").fetch("desktop")
     assert_equal "not-tested", peekaboo_plan.fetch("evidence").fetch("mcp")
     assert_equal "not-tested", peekaboo_plan.fetch("evidence").fetch("runnable")
+    assert_equal "direct", peekaboo_plan.fetch("evidence").fetch("mode")
+    bridge_socket = testpath.realpath/"missing-peekaboo.sock"
+    bridge_plan = JSON.parse(shell_output(
+      [bin/"pi-shared", "peekaboo", "plan", "--json", "--mode", "bridge", "--bridge-socket", bridge_socket].map(&:to_s).shelljoin
+    ))
+    assert_equal 2, bridge_plan.fetch("schemaVersion")
+    assert_equal true, bridge_plan.fetch("ok")
+    assert_equal "bridge", bridge_plan.fetch("evidence").fetch("mode")
+    assert_equal "missing", bridge_plan.fetch("evidence").fetch("bridgeSocketState")
+    assert_nil bridge_plan.fetch("evidence").fetch("permissionSource")
+    assert_equal "not-tested", bridge_plan.fetch("evidence").fetch("desktop")
+    refute_path_exists bridge_socket
     refute_path_exists testpath/".config/mcp/mcp.json"
     refute_path_exists testpath/".local/share/peekaboo"
     assert_match "--expected-plan", shell_output("#{bin}/pi-shared capability --help")
