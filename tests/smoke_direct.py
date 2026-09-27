@@ -47,8 +47,10 @@ def main():
         del env["PI_SHARED_AGENT_DIR"]  # Subsequent operations must use saved paths.
         run("pi", "models")
         listing = json.loads(subprocess.check_output(["pi", "models", "--direct", "--json"], env=env, text=True))
-        assert [row["alias"] for row in listing["models"]] == ["openai"]
-        assert listing["models"][0]["group"] == "direct"
+        assert [row["alias"] for row in listing["models"]] == ["anthropic", "openai"]
+        assert all(row["group"] == "direct" for row in listing["models"])
+        assert listing["models"][0]["provider"] == "anthropic"
+        run("pi-anthropic", "--help")  # No inference; validates packaged command and enabled route.
         assert json.loads(subprocess.check_output(["pi", "models", "--local", "--json"], env=env, text=True))["models"] == []
         assert "Route: openai-codex/" in subprocess.check_output(["pi", "models", "--verbose"], env=env, text=True)
         run("pi", "--launcher-check")
@@ -58,8 +60,9 @@ def main():
         expected_default["defaultModel"] = "gpt-6-sol"
         (profile / "settings.json").write_text(json.dumps(expected_default))
         listing = json.loads(subprocess.check_output(["pi", "models", "--json"], env=env, text=True))
-        assert listing["models"][0]["default"] is True
-        assert listing["models"][0]["model"] == "gpt-6-sol"
+        openai = next(row for row in listing["models"] if row["alias"] == "openai")
+        assert openai["default"] is True
+        assert openai["model"] == "gpt-6-sol"
         assert "openai\topenai-codex/gpt-6-sol" in subprocess.check_output(
             ["pi", "--launcher-list"], env=env, text=True)
         assert listing["savedDefault"]["profile"] == str(profile)

@@ -5,9 +5,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.25.tar.gz"
-  version "0.1.25"
-  sha256 "5a70d56a6cc5b01ab8c217f601854879b686864e0354f98757ec2c9ad05f6c80"
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.26.tar.gz"
+  version "0.1.26"
+  sha256 "7b16dca5316396e2c4df74ce2a6080dad426de389d2a45f24cf1f1931e4f44cd"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -55,12 +55,17 @@ class PiShared < Formula
               "#!#{Formula["python@3.12"].opt_bin}/python3.12"
     inreplace libexec/"bin/pi-shared", "#!/usr/bin/env python3",
               "#!#{Formula["python@3.12"].opt_bin}/python3.12"
+    inreplace libexec/"bin/pi-anthropic", "#!/usr/bin/env python3",
+              "#!#{Formula["python@3.12"].opt_bin}/python3.12"
     paths = [bin, Formula["node"].opt_bin, Formula["python@3.12"].opt_libexec/"bin",
              Formula["uv"].opt_bin, Formula["git"].opt_bin, HOMEBREW_PREFIX/"bin"]
     (bin/"pi-shared").write_env_script libexec/"bin/pi-shared", PATH: "#{paths.join(":")}:$PATH"
     (bin/"pi").write_env_script libexec/"bin/pi",
                                PATH: "#{paths.join(":")}:$PATH",
                                PI_UPSTREAM_BIN: (bin/"pi-upstream").to_s
+    (bin/"pi-anthropic").write_env_script libexec/"bin/pi-anthropic",
+                                         PATH: "#{paths.join(":")}:$PATH",
+                                         PI_UPSTREAM_BIN: (bin/"pi-upstream").to_s
   end
 
   def caveats
@@ -207,6 +212,7 @@ class PiShared < Formula
     assert_equal expected_pi, shell_output("#{bin}/pi --version").strip
     assert_match "launcher support is not installed", shell_output("#{bin}/pi models 2>&1", 1)
     assert_match "launcher support is not installed", shell_output("#{bin}/pi models --json 2>&1", 1)
+    assert_match "direct launcher is unavailable", shell_output("#{bin}/pi-anthropic 2>&1", 1)
     assert_equal libexec/"runtime/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js",
                  (bin/"pi-upstream").realpath
     assert_equal expected_pi, shell_output("#{bin}/pi-upstream --version").strip

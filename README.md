@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.25** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.26** and its source SHA-256, with a locked Pi
 **0.85.1** runtime validated through the maintainer's required approved registry.
 Upgrading from packages 0.1.10 or 0.1.11 intentionally replaces Pi 0.87.1 with
 0.85.1; the newer setup CLI features remain available. Check the package CI above
@@ -268,6 +268,10 @@ run with original custom overrides to capture missing update settings. See
 
 The lower-level operations remain available:
 
+- `pi-anthropic` opens the native Anthropic shortcut only when direct launchers
+  are enabled. Sign in inside Pi with `/login anthropic` for Claude OAuth (extra
+  usage billed per token), or use an Anthropic API key. It never logs in during
+  setup and does not turn an unavailable shortcut into an inference prompt.
 - `brew upgrade GeorgeTheo99/tap/pi-shared` updates the packaged orchestrator
   and pinned Pi runtime. Bare `pi update` delegates to the managed updater in
   package 0.1.11+; explicit stock self-update flags and global npm do not manage
