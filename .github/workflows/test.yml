@@ -124,7 +124,8 @@ jobs:
           set -euo pipefail
           mkdir -p "$HOME"
           model-gateway install
-          model-gateway status | grep -q '"service":"model-gateway"'
+          status=$(model-gateway status)
+          grep -q '"service":"model-gateway"' <<< "$status"
           config="$HOME/Library/Application Support/model-gateway/config.yaml"
           test "$(stat -f '%Lp' "$config")" = 600
           key=$(awk '/admin_keys:/ {getline; sub(/^ *- */, ""); print; exit}' "$config")
