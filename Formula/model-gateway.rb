@@ -3,8 +3,8 @@ require "net/http"
 class ModelGateway < Formula
   desc "Self-hosted OpenAI/Anthropic-compatible router for cloud and local models"
   homepage "https://github.com/GeorgeTheo99/model-gateway"
-  url "https://github.com/GeorgeTheo99/model-gateway/archive/refs/tags/v0.2.0.tar.gz"
-  sha256 "0061133c163e7cc33845eef4c0f31624669dcdf7f87cce6d4c54909153deb9e1"
+  url "https://github.com/GeorgeTheo99/model-gateway/archive/refs/tags/v0.2.1.tar.gz"
+  sha256 "4c725c25a7d416acc393cacf48420760acee42b65fb8b668409bec8a25c89f21"
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/model-gateway.git", branch: "main"
 
@@ -82,10 +82,7 @@ class ModelGateway < Formula
       providers: {}
     YAML
     chmod 0600, testpath/"config.yaml"
-    (testpath/"model-info.json").write <<~JSON
-      {"llm": [{"name": "starter-placeholder", "provider": "starter",
-                "provider_model_id": "starter-placeholder", "context": 8192, "max_output_tokens": 4096}]}
-    JSON
+    (testpath/"model-info.json").write '{"allow_empty": true, "llm": []}'
     port = free_port
     server = spawn({
       "MODEL_GATEWAY_CONFIG"        => (testpath/"config.yaml").to_s,
