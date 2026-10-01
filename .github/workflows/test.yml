@@ -132,5 +132,8 @@ jobs:
           printf 'x-api-key: %s\n' "$key" > "$RUNNER_TEMP/admin-headers"
           curl -fsS -H @"$RUNNER_TEMP/admin-headers" http://127.0.0.1:19111/admin/api/status \
             | jq -e '.writes_enabled and .auth.admin_key_configured'
+          catalog="$HOME/Library/Application Support/model-gateway/model-info.json"
+          jq -e '.allow_empty == true and .llm == []' "$catalog"
+          curl -fsS http://127.0.0.1:19111/v1/models | jq -e '.data == []'
           model-gateway uninstall
           ! launchctl print "gui/$(id -u)/com.local.model-gateway" >/dev/null 2>&1

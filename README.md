@@ -89,7 +89,7 @@ providers and local models. Review [the formula](Formula/model-gateway.rb), then
 ```sh
 brew trust --formula georgetheo99/tap/model-gateway
 brew install georgetheo99/tap/model-gateway
-model-gateway install   # config + starter catalog, LaunchAgent on 127.0.0.1:9111
+model-gateway install   # config + empty catalog, LaunchAgent on 127.0.0.1:9111
 model-gateway admin     # copies the generated admin key and opens the admin UI
 ```
 
