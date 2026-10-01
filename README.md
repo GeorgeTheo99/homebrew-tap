@@ -1,4 +1,4 @@
-# Homebrew tap for pi-shared
+# Homebrew tap: pi-shared and model-gateway
 
 [![Homebrew package](https://github.com/GeorgeTheo99/homebrew-tap/actions/workflows/test.yml/badge.svg)](https://github.com/GeorgeTheo99/homebrew-tap/actions/workflows/test.yml)
 
@@ -79,6 +79,33 @@ This restores Anthropic OAuth compatibility with the newer Claude Code version
 gate; the pi-shared module adds a separate outbound tool-schema compatibility
 hook. Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
+
+## model-gateway
+
+[model-gateway](https://github.com/GeorgeTheo99/model-gateway) is a self-hosted
+model router: one local OpenAI/Anthropic-compatible endpoint in front of cloud
+providers and local models. Review [the formula](Formula/model-gateway.rb), then:
+
+```sh
+brew trust --formula georgetheo99/tap/model-gateway
+brew install georgetheo99/tap/model-gateway
+model-gateway install   # config + starter catalog, LaunchAgent on 127.0.0.1:9111
+model-gateway admin     # copies the generated admin key and opens the admin UI
+```
+
+Add a connection in the admin UI, discover its models and register them.
+Config, catalog, provider keys and the usage ledger live in
+`~/Library/Application Support/model-gateway` and survive upgrades; the locked
+Python environment is built in `$(brew --prefix)/var/model-gateway/venv`.
+
+- Upgrade: `brew upgrade model-gateway && model-gateway restart`
+- Remove: `model-gateway uninstall` (stops the LaunchAgent), then
+  `brew uninstall model-gateway` and `rm -rf "$(brew --prefix)/var/model-gateway"`.
+  State in Application Support is retained.
+
+`pi-shared setup --with model-gateway` installs the gateway from a git checkout
+instead; use one or the other on a machine, since both register the same
+`com.local.model-gateway` LaunchAgent.
 
 ## What gets installed
 

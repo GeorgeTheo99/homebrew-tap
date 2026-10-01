@@ -92,3 +92,44 @@ jobs:
           test "$(jq -r .defaultProvider "$HOME/.pi/agent/settings.json")" = openai-codex
           pi --version
           pi-upstream --version
+
+  model-gateway:
+    runs-on: macos-15
+    timeout-minutes: 20
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_ANALYTICS: "1"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Register this exact checkout as a disposable local tap
+        run: |
+          git switch -C main
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          brew tap model-gateway-ci/test "$GITHUB_WORKSPACE"
+      - name: Style and strict audit
+        run: |
+          brew style model-gateway-ci/test/model-gateway
+          brew audit --strict model-gateway-ci/test/model-gateway
+      - name: Install package without starting a service
+        run: brew install --build-from-source model-gateway-ci/test/model-gateway
+      - name: Exercise packaged CLI and a foreground gateway
+        run: brew test model-gateway-ci/test/model-gateway
+      - name: Install, verify and remove the LaunchAgent in a disposable HOME
+        env:
+          HOME: ${{ runner.temp }}/model-gateway-home
+          MODEL_GATEWAY_PORT: "19111"
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME"
+          model-gateway install
+          model-gateway status | grep -q '"service":"model-gateway"'
+          config="$HOME/Library/Application Support/model-gateway/config.yaml"
+          test "$(stat -f '%Lp' "$config")" = 600
+          key=$(awk '/admin_keys:/ {getline; sub(/^ *- */, ""); print; exit}' "$config")
+          printf 'x-api-key: %s\n' "$key" > "$RUNNER_TEMP/admin-headers"
+          curl -fsS -H @"$RUNNER_TEMP/admin-headers" http://127.0.0.1:19111/admin/api/status \
+            | jq -e '.writes_enabled and .auth.admin_key_configured'
+          model-gateway uninstall
+          ! launchctl print "gui/$(id -u)/com.local.model-gateway" >/dev/null 2>&1
