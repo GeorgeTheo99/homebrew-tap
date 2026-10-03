@@ -3,8 +3,8 @@ require "net/http"
 class ModelGateway < Formula
   desc "Self-hosted OpenAI/Anthropic-compatible router for cloud and local models"
   homepage "https://github.com/GeorgeTheo99/model-gateway"
-  url "https://github.com/GeorgeTheo99/model-gateway/archive/refs/tags/v0.2.1.tar.gz"
-  sha256 "4c725c25a7d416acc393cacf48420760acee42b65fb8b668409bec8a25c89f21"
+  url "https://github.com/GeorgeTheo99/model-gateway/archive/refs/tags/v0.4.2.tar.gz"
+  sha256 "b9adf722fc5ea99be5777a71bb404f412531b3b6e6bb2cc8a7357976b43b26ad"
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/model-gateway.git", branch: "main"
 
@@ -13,7 +13,8 @@ class ModelGateway < Formula
   depends_on "uv"
 
   def install
-    libexec.install "bin", "src", "scripts", "config", "docs", "pyproject.toml", "uv.lock", "README.md", "LICENSE"
+    libexec.install "bin", "src", "scripts", "config", "docs", "local-models", "local-runtime",
+                    "pyproject.toml", "uv.lock", "README.md", "LICENSE"
     # The CLI runs from the version-independent opt path, so the LaunchAgent
     # it writes keeps working across upgrades.
     (libexec/".package").write <<~EOS
@@ -75,6 +76,10 @@ class ModelGateway < Formula
     assert_match "MODEL_GATEWAY_CONFIG=#{app}/config.yaml\n", env
     assert_match "MODEL_GATEWAY_LEDGER_PATH=#{app}/ledger.db\n", env
     assert_match "brew upgrade model-gateway", shell_output("#{bin}/model-gateway update 2>&1", 1)
+    assert_equal version.to_s, JSON.parse(shell_output("#{bin}/model-gateway version --json")).fetch("version")
+    # Local AI reads its verified model manifest and locked runtime from the keg.
+    assert_path_exists libexec/"local-models/qwen3.8-27b-8bit.json"
+    assert_path_exists libexec/"local-runtime/uv.lock"
 
     (testpath/"config.yaml").write <<~YAML
       auth:
