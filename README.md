@@ -73,11 +73,11 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.27** and its source SHA-256, with a locked Pi
-**0.87.1** runtime validated through the explicitly approved public npm registry.
-This restores Anthropic OAuth compatibility with the newer Claude Code version
-gate; the pi-shared module adds a separate outbound tool-schema compatibility
-hook. Check the package CI above before relying on a new release.
+The formula pins pi-setup **v0.1.29** and its source SHA-256, with a locked Pi
+**0.99.1** runtime validated through the explicitly approved public npm registry.
+Pi 0.99 adds built-in MCP, codemode and `tool_search`; an installed
+`pi-mcp-adapter` replaces the built-in MCP support until it is removed.
+Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
 ## model-gateway
