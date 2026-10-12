@@ -73,9 +73,10 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.29** and its source SHA-256, with a locked Pi
-**0.99.1** runtime validated through the explicitly approved public npm registry.
-Pi 0.99 adds built-in MCP, codemode and `tool_search`; an installed
+The formula pins pi-setup **v0.1.36** and its source SHA-256, with a locked Pi
+**1.0.3** runtime validated through the explicitly approved npm registry.
+Pi 0.99+ adds built-in MCP, codemode and `tool_search`; Pi 1.0 renames the Azure
+provider to `azure` and normalizes MCP namespaces (`-` becomes `_`). An installed
 `pi-mcp-adapter` replaces the built-in MCP support until it is removed.
 Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
