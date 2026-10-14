@@ -13,6 +13,9 @@ import tempfile
 import threading
 
 
+CATALOG = "/model-gateway/v1/models/canonical"
+
+
 def main():
     requests = []
     token = "release-smoke-only-token"
@@ -20,7 +23,7 @@ def main():
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
             requests.append(self.path)
-            if self.path != "/model-gateway/v1/models/canonical" or self.headers.get("Authorization") != "Bearer " + token:
+            if self.path != CATALOG or self.headers.get("Authorization") != "Bearer " + token:
                 self.send_error(403)
                 return
             self.send_response(200)
@@ -72,11 +75,18 @@ def main():
             assert provider["apiKey"].startswith("!")
             for path in (receipt_path, Path(receipt["cli_file"]), models_path):
                 assert token not in path.read_text()
-            assert requests == ["/model-gateway/v1/models/canonical"]
-            # With the server still live, count any accidental catalog reads.
+            assert requests == [CATALOG]
+            # status and update each add exactly one authenticated catalog read.
             run("pi-shared", "status")
             run("pi-shared", "update", "--modules-only")
-            assert requests == ["/model-gateway/v1/models/canonical"]
+            assert requests == [CATALOG] * 3
+            # A rotated/retired server key: status fails loudly, update only warns.
+            key.write_text("retired-smoke-token\n")
+            rejected = subprocess.run(["pi-shared", "status"], env=env, capture_output=True, text=True, timeout=600)
+            assert rejected.returncode == 1 and "REJECTED" in rejected.stdout, rejected.stdout + rejected.stderr
+            run("pi-shared", "update", "--modules-only")
+            key.write_text(token + "\n")
+            assert requests == [CATALOG] * 5
             # Also prove lifecycle succeeds when the server no longer exists.
             server.shutdown()
             thread.join()
@@ -96,9 +106,9 @@ def main():
             run("pi-shared", "update", "--modules-only")
             run("pi-shared", "status")
             assert json.loads(receipt_path.read_text())["external_gateway"] == receipt["external_gateway"]
-            assert requests == ["/model-gateway/v1/models/canonical"]
+            assert requests == [CATALOG] * 5  # unreachable gateway: warnings only
             assert not (home / ".zshrc").exists()
-            print("PASS: installed direct-gateway setup, model listing/default and offline update/status")
+            print("PASS: installed direct-gateway setup, model listing/default, key probe and update/status")
     finally:
         if not stopped:
             server.shutdown()
