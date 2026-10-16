@@ -3,8 +3,8 @@ require "net/http"
 class ModelGateway < Formula
   desc "Self-hosted OpenAI/Anthropic-compatible router for cloud and local models"
   homepage "https://github.com/GeorgeTheo99/model-gateway"
-  url "https://github.com/GeorgeTheo99/model-gateway/archive/refs/tags/v0.5.4.tar.gz"
-  sha256 "82cd0714ef0d7f0f6895d89a8232d813acf4ad64d30b65595aa97d2bd265755c"
+  url "https://github.com/GeorgeTheo99/model-gateway/archive/refs/tags/v0.6.0.tar.gz"
+  sha256 "6abd1adc4e81332c717d259ece3fa2f2228f3f0b0076d07572343055c67a6647"
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/model-gateway.git", branch: "main"
 
