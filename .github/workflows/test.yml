@@ -88,8 +88,13 @@ jobs:
           pi list
           pi --launcher-check
           pi --launcher-refresh
+          # Saving the openai default needs a ChatGPT plan login; synthetic, never used.
+          auth="$HOME/.pi/agent/auth.json"
+          [ -e "$auth" ] || (umask 077 && echo '{}' > "$auth")
+          jq '.openai = {"type": "oauth"}' "$auth" > "$RUNNER_TEMP/auth.json"
+          cat "$RUNNER_TEMP/auth.json" > "$auth"
           pi openai --default
-          test "$(jq -r .defaultProvider "$HOME/.pi/agent/settings.json")" = openai-codex
+          test "$(jq -r .defaultProvider "$HOME/.pi/agent/settings.json")" = openai
           pi --version
           pi-upstream --version
 

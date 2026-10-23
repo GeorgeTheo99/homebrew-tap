@@ -18,7 +18,7 @@ def main():
         profile = home / "custom-native-profile"
         profile.mkdir(mode=0o700)
         native = {
-            "auth.json": '{"test-provider":{"type":"api_key","key":"synthetic-only"}}',
+            "auth.json": '{"test-provider":{"type":"api_key","key":"synthetic-only"},"openai":{"type":"oauth"}}',
             "models.json": '{"providers":{}}',
         }
         for name, content in native.items():
@@ -52,23 +52,24 @@ def main():
         assert listing["models"][0]["provider"] == "anthropic"
         run("pi-anthropic", "--help")  # No inference; validates packaged command and enabled route.
         assert json.loads(subprocess.check_output(["pi", "models", "--local", "--json"], env=env, text=True))["models"] == []
-        assert "Route: openai-codex/" in subprocess.check_output(["pi", "models", "--verbose"], env=env, text=True)
+        assert "Route: openai/" in subprocess.check_output(["pi", "models", "--verbose"], env=env, text=True)
         run("pi", "--launcher-check")
         run("pi", "openai", "--default")
         expected_default = json.loads((profile / "settings.json").read_text())
-        assert expected_default["defaultProvider"] == "openai-codex"
+        assert expected_default["defaultProvider"] == "openai"
         expected_default["defaultModel"] = "gpt-6-sol"
         (profile / "settings.json").write_text(json.dumps(expected_default))
         listing = json.loads(subprocess.check_output(["pi", "models", "--json"], env=env, text=True))
         openai = next(row for row in listing["models"] if row["alias"] == "openai")
         assert openai["default"] is True
         assert openai["model"] == "gpt-6-sol"
-        assert "openai\topenai-codex/gpt-6-sol" in subprocess.check_output(
+        assert "openai\topenai/gpt-6-sol" in subprocess.check_output(
             ["pi", "--launcher-list"], env=env, text=True)
         assert listing["savedDefault"]["profile"] == str(profile)
         run("pi", "openai", "--set-context=standard")
         selected = json.loads((profile / "models.json").read_text())
-        assert {v["contextWindow"] for v in selected["providers"]["openai-codex"]["modelOverrides"].values()} == {272000}
+        assert {v["contextWindow"] for provider in ("openai", "openai-codex")
+                for v in selected["providers"][provider]["modelOverrides"].values()} == {272000}
         run("pi-shared", "setup", "--mode", "direct", "--without-browser", "--yes")
         run("pi-shared", "status")
         run("pi-shared", "update", "--modules-only")
@@ -85,20 +86,20 @@ def main():
         assert json.loads((profile / "settings.json").read_text()) == expected_default
         assert (profile / "auth.json").read_text() == native["auth.json"]
         models = json.loads((profile / "models.json").read_text())
-        assert set(models["providers"]) == {"openai-codex"}
-        overrides = models["providers"]["openai-codex"]["modelOverrides"]
-        assert set(overrides) == {"gpt-5.6-luna", "gpt-5.6-sol", "gpt-5.6-terra",
-                                  "gpt-6-astra", "gpt-6-luna", "gpt-6-sol"}
-        assert all(value == {"contextWindow": 272000} for value in overrides.values())
+        assert set(models["providers"]) == {"openai", "openai-codex"}
+        for provider in models["providers"].values():
+            assert set(provider["modelOverrides"]) == {"gpt-5.6-luna", "gpt-5.6-sol", "gpt-5.6-terra",
+                                                       "gpt-6-astra", "gpt-6-luna", "gpt-6-sol"}
+            assert all(value == {"contextWindow": 272000} for value in provider["modelOverrides"].values())
         run("pi", "openai", "--set-context=max")
         restored = json.loads((profile / "models.json").read_text())
-        assert all(value == {"contextWindow": 872000} for value in
-                   restored["providers"]["openai-codex"]["modelOverrides"].values())
+        assert all(value == {"contextWindow": 872000} for provider in restored["providers"].values()
+                   for value in provider["modelOverrides"].values())
         assert aliases.read_text() == "INVALID GATEWAY CATALOG MUST NOT BE READ"
         for path in (home / ".zshrc", home / ".pi-omlx", home / "Library/LaunchAgents",
                      home / ".pi/agent/settings.json", Path(after["code_root"]) / "model-gateway"):
             assert not path.exists(), path
-        print("PASS: direct-only setup/update, saved Sol, persistent 272K and 872K Codex modes, native auth preserved")
+        print("PASS: direct-only setup/update, saved Sol, persistent 272K and 872K ChatGPT subscription modes, native auth preserved")
 
 
 if __name__ == "__main__":
