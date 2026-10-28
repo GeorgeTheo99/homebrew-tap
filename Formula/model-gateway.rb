@@ -3,8 +3,8 @@ require "net/http"
 class ModelGateway < Formula
   desc "Self-hosted OpenAI/Anthropic-compatible router for cloud and local models"
   homepage "https://github.com/GeorgeTheo99/model-gateway"
-  url "https://github.com/GeorgeTheo99/model-gateway/archive/refs/tags/v0.8.5.tar.gz"
-  sha256 "fc3798bdad9870ee3ecf833b3842f114398a7c0002078bc80a99ed5a528076f5"
+  url "https://github.com/GeorgeTheo99/model-gateway/archive/refs/tags/v0.9.0.tar.gz"
+  sha256 "aa49c8d32583ebaaa622f784b5716e1792e5a0957afdbf43ae3592842a289178"
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/model-gateway.git", branch: "main"
 
@@ -14,7 +14,7 @@ class ModelGateway < Formula
 
   def install
     libexec.install "bin", "src", "scripts", "config", "docs", "local-models", "local-runtime",
-                    "pyproject.toml", "uv.lock", "README.md", "LICENSE"
+                    "media-runtime", "pyproject.toml", "uv.lock", "README.md", "LICENSE"
     # The CLI runs from the version-independent opt path, so the LaunchAgent
     # it writes keeps working across upgrades.
     (libexec/".package").write <<~EOS
@@ -80,6 +80,8 @@ class ModelGateway < Formula
     # Local AI reads its verified model manifest and locked runtime from the keg.
     assert_path_exists libexec/"local-models/qwen3.8-27b-8bit.json"
     assert_path_exists libexec/"local-runtime/uv.lock"
+    # So does optional media generation (model-gateway media add).
+    assert_path_exists libexec/"media-runtime/uv.lock"
 
     (testpath/"config.yaml").write <<~YAML
       auth:
