@@ -57,6 +57,8 @@ jobs:
           HOME: ${{ runner.temp }}/pi-shared-smoke-home
         run: |
           mkdir -p "$HOME"
+          # Homebrew keeps tap trust under HOME, so this HOME needs its own.
+          brew trust --tap pi-shared-ci/test
           pi-shared setup --mode cloud --yes
           pi-shared status
           pi-shared update --plan
