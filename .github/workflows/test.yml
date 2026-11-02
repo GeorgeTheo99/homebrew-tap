@@ -31,6 +31,7 @@ jobs:
           git switch -C main
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           brew tap pi-shared-ci/test "$GITHUB_WORKSPACE"
+          brew trust --tap pi-shared-ci/test
       - name: Install package without provisioning services or models
         shell: bash
         run: |
@@ -113,6 +114,7 @@ jobs:
           git switch -C main
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           brew tap model-gateway-ci/test "$GITHUB_WORKSPACE"
+          brew trust --tap model-gateway-ci/test
       - name: Style and strict audit
         run: |
           brew style model-gateway-ci/test/model-gateway
