@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.42** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.43** and its source SHA-256, with a locked Pi
 **1.5.0** runtime whose packages are all at least seven days old.
 Pi 0.99+ adds built-in MCP, codemode and `tool_search`; Pi 1.0 renames the Azure
 provider to `azure` and normalizes MCP namespaces (`-` becomes `_`). An installed
