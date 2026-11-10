@@ -114,6 +114,7 @@ def main():
         ("Optional Omnigent", b"\r"),
         ("Optional independent recovery", b"\r"),
         ("Web search and page retrieval", down * 2 + b"\r"),
+        ("Scheduled agent jobs (pi-jobs)", down * 2 + b"\r"),
         ("Cancel without changes", b"\x1b[6~\x1bOH\r"),
     ], 0)
     if "Cancelled; no installation changes made." not in output or "Choice (or cancel)" in output:
