@@ -46,7 +46,7 @@ def main():
             args = shlex.split(recipe.replace("$HOME", str(home)))
             assert args[0] == "pi-shared" and "--plan" in args
             assert "Setup plan" in run(home, *args[1:])
-        print("PASS: installed help and all 12 setup recipes in empty homes")
+        print("PASS: installed help and all 14 setup recipes in empty homes")
 
 
 if __name__ == "__main__":
