@@ -39,7 +39,7 @@ def main():
         examples = help_text.split("Examples (", 1)[1].split("Apply and verify:", 1)[0]
         recipes = [line.strip() for line in examples.replace("\\\n", "").splitlines()
                    if line.strip().startswith("pi-shared setup ")]
-        assert len(recipes) == 12
+        assert len(recipes) == 14
         for number, recipe in enumerate(recipes):
             home = root / f"recipe-{number}"
             home.mkdir()
