@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.56** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.57** and its source SHA-256, with a locked Pi
 **1.5.0** runtime whose packages are all at least seven days old.
 Pi 0.99+ adds built-in MCP, codemode and `tool_search`; Pi 1.0 renames the Azure
 provider to `azure` and normalizes MCP namespaces (`-` becomes `_`). An installed
@@ -128,7 +128,8 @@ Launcher failures are reported in the terminal, not as desktop notifications.
 
 - **Claude bridge:** `pi claude --list-models` checks whether the bridge
   registers models without sending a prompt. It does not verify Claude Code
-  login; use `claude auth status` for that.
+  login; use `claude auth status` for that. If a configured model alias is
+  already named `claude`, use `pi-claude` for the bridge or rename that alias.
 - **ChatGPT:** `pi models --direct` lists configured shortcuts, not login
   status. Use `/login` in Pi and choose **Sign in with ChatGPT** if auth fails.
 - **Runtime:** If `pi --version` fails before any model loads, check Homebrew.

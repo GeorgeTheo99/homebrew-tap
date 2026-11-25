@@ -5,10 +5,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.56.tar.gz"
-  version "0.1.56"
-  sha256 "62eaa518c0341b978ceba786a6e9b48fea6cb08e8d1cc6aff63849adf2e035f9"
-  revision 1
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.57.tar.gz"
+  version "0.1.57"
+  sha256 "dec55fad5ef561faf9a153fc9d878898d1b9fd5174c938f1baf66a251a1bf870"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -123,7 +122,28 @@ class PiShared < Formula
         printf '%s\\n' "$matches"
         exit 0
       fi
-      exec "$pi" --models 'claude-bridge/*' "$@"
+      # Pin the provider in the final process, not only in the discovery probe.
+      # Otherwise Pi can fall back if the bridge disappears between launches.
+      for arg do
+        case "$arg" in
+          --provider|--provider=*|--models|--models=*|--no-extensions|-ne)
+            echo 'pi claude: this launcher requires the Claude bridge and does not accept provider, model-scope or extension-disable overrides. Use pi for those options.' >&2
+            exit 1
+            ;;
+        esac
+      done
+      model=$(#{(Formula["python@3.12"].opt_bin/"python3.12").to_s.shellescape} -c '
+      import json, sys
+      from pathlib import Path
+      try:
+          settings = json.loads(Path(sys.argv[1]).read_text())
+          if isinstance(settings, dict) and settings.get("defaultProvider") == "claude-bridge":
+              print(settings.get("defaultModel", ""))
+      except (OSError, ValueError):
+          pass
+      ' "$PI_CODING_AGENT_DIR/settings.json") || exit "$?"
+      model=$(printf '%s\\n' "$matches" | /usr/bin/awk -v preferred="$model" '$1 == "claude-bridge" { if (!first) first = $2; if ($2 == preferred) chosen = $2 } END { print chosen ? chosen : first }')
+      exec "$pi" --provider claude-bridge --model "$model" --models 'claude-bridge/*' "$@"
     SH
     launcher.chmod(0755)
 
