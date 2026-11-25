@@ -73,7 +73,7 @@ pi-shared setup --mode cloud --plan
 pi-shared status
 ```
 
-The formula pins pi-setup **v0.1.44** and its source SHA-256, with a locked Pi
+The formula pins pi-setup **v0.1.56** and its source SHA-256, with a locked Pi
 **1.5.0** runtime whose packages are all at least seven days old.
 Pi 0.99+ adds built-in MCP, codemode and `tool_search`; Pi 1.0 renames the Azure
 provider to `azure` and normalizes MCP namespaces (`-` becomes `_`). An installed
@@ -83,16 +83,20 @@ Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
 ## Optional Claude Code bridge
 
-Homebrew includes `pi-claude`, which uses the same Pi and Node runtime as
-`pi-shared`. It keeps bridge settings and sessions in `~/.pi-claude/agent`,
+Homebrew `pi-shared` **0.1.56_1** adds `pi-claude`, an optional launcher that
+uses the same bundled Pi and Homebrew Node regardless of your shell's Node
+version. Run `pi-claude --help` for setup or `pi-claude --version` for the
+bundled Pi version. Unlike `pi-anthropic`, it uses the Claude Code bridge,
+not Pi's native Anthropic provider. It keeps bridge settings and sessions in
+`~/.pi-claude/agent`,
 separate from the default Pi profile. It clears inherited `ANTHROPIC_API_KEY`,
 `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` so those exports do not override
 Claude Code's configuration. Installing `pi-shared` does not install the bridge
 or sign you in.
 
-For a new profile, sign in with Claude Code, then opt in to the Pi extension.
-This bridge version was tested with the Pi 1.5.0 runtime in `pi-shared` 0.1.56;
-check the bridge's Pi compatibility before changing versions.
+With Claude Code installed, sign in and opt in to the bridge extension.
+The pinned bridge below was tested with the bundled Pi 1.5.0; check compatibility
+before changing bridge versions.
 
 ```sh
 claude auth login
@@ -101,12 +105,22 @@ pi-claude --list-models claude-bridge
 pi-claude
 ```
 
-Already using a local `pi-claude` shell function? Verify the packaged executable
-with `"$(brew --prefix pi-shared)/bin/pi-claude" --list-models claude-bridge`,
-and confirm that it shows at least one `claude-bridge` provider row. Then remove
-the old function from your shell startup file and open a new shell. The packaged
-launcher reuses `~/.pi-claude/agent`; no profile migration or separate Pi
-installation is needed.
+Already using a local `pi-claude` shell function? Upgrade and check the packaged
+command by absolute path so the old function can't shadow it:
+
+```sh
+brew update
+brew upgrade pi-shared
+"$(brew --prefix pi-shared)/bin/pi-claude" --list-models claude-bridge
+```
+
+Once you see a `claude-bridge` provider row, remove the old function from your
+shell startup file and open a new shell. The launcher reuses
+`~/.pi-claude/agent`; no profile migration or separate Pi installation is needed.
+
+Keep upgrading the runtime through Homebrew. Homebrew upgrades leave the bridge
+profile and extension alone; use `pi-claude list` to see installed extensions
+and `pi-claude install` to select a compatible bridge version.
 
 ## model-gateway
 
@@ -142,7 +156,8 @@ instead; use one or the other on a machine, since both register the same
 - The Pi CLI and setup orchestrator under Homebrew `libexec`. npm uses the
   committed lockfile with lifecycle scripts disabled; its cache/config stay in
   the disposable build directory. `pi` is a thin dispatcher; `pi-upstream` is
-  the stock-runtime symlink used for recovery and SDK discovery.
+  the stock-runtime symlink used for recovery and SDK discovery. `pi-claude`
+  is the opt-in [Claude Code bridge launcher](#optional-claude-code-bridge).
 - **Nothing is provisioned automatically:** no Pi profile or shell changes,
   credential prompts, service registration, or LLM downloads during
   `brew install`. Homebrew still manages its normal prefix/cache/dependencies.
