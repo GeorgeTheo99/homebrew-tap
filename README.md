@@ -81,6 +81,33 @@ provider to `azure` and normalizes MCP namespaces (`-` becomes `_`). An installe
 Check the package CI above before relying on a new release.
 Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
+## Optional Claude Code bridge
+
+Homebrew includes `pi-claude`, which uses the same Pi and Node runtime as
+`pi-shared`. It keeps bridge settings and sessions in `~/.pi-claude/agent`,
+separate from the default Pi profile. It clears inherited `ANTHROPIC_API_KEY`,
+`ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` so those exports do not override
+Claude Code's configuration. Installing `pi-shared` does not install the bridge
+or sign you in.
+
+For a new profile, sign in with Claude Code, then opt in to the Pi extension.
+This bridge version was tested with the Pi 1.5.0 runtime in `pi-shared` 0.1.56;
+check the bridge's Pi compatibility before changing versions.
+
+```sh
+claude auth login
+pi-claude install npm:pi-claude-bridge@0.11.0
+pi-claude --list-models claude-bridge
+pi-claude
+```
+
+Already using a local `pi-claude` shell function? Verify the packaged executable
+with `"$(brew --prefix pi-shared)/bin/pi-claude" --list-models claude-bridge`,
+and confirm that it shows at least one `claude-bridge` provider row. Then remove
+the old function from your shell startup file and open a new shell. The packaged
+launcher reuses `~/.pi-claude/agent`; no profile migration or separate Pi
+installation is needed.
+
 ## model-gateway
 
 [model-gateway](https://github.com/GeorgeTheo99/model-gateway) is a self-hosted
