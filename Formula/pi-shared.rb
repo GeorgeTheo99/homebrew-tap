@@ -8,6 +8,7 @@ class PiShared < Formula
   url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.56.tar.gz"
   version "0.1.56"
   sha256 "62eaa518c0341b978ceba786a6e9b48fea6cb08e8d1cc6aff63849adf2e035f9"
+  revision 1
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -50,6 +51,66 @@ class PiShared < Formula
     pi_cli = libexec/"runtime/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js"
     inreplace pi_cli, "#!/usr/bin/env node", "#!#{Formula["node"].opt_bin}/node"
     bin.install_symlink pi_cli => "pi-upstream"
+
+    # Share the packaged Pi and Homebrew Node, but keep the Claude bridge profile opt-in.
+    launcher = bin/"pi-claude"
+    launcher.write <<~SH
+      #!/bin/sh
+      export PATH=#{Formula["node"].opt_bin.to_s.shellescape}:"$PATH"
+      export PI_CODING_AGENT_DIR="$HOME/.pi-claude/agent"
+      unset ANTHROPIC_API_KEY ANTHROPIC_BASE_URL ANTHROPIC_AUTH_TOKEN PI_CODING_AGENT_SESSION_DIR
+      pi=#{(bin/"pi-upstream").to_s.shellescape}
+      case "${1-}" in
+        -h|--help)
+          /bin/cat <<'HELP'
+      Usage: pi-claude [pi options] [prompt...]
+             pi-claude --list-models [search]
+             pi-claude install|list|remove ...
+             pi-claude --help | --version
+
+      Launch Pi through the optional Claude Code bridge. Uses the Pi and Node
+      installed by Homebrew's pi-shared package and the ~/.pi-claude/agent profile.
+      This is separate from pi-anthropic (Pi's native Anthropic provider).
+
+      First-time setup (requires Claude Code):
+        claude auth login
+        pi-claude install npm:pi-claude-bridge@0.11.0
+        pi-claude --list-models claude-bridge
+        pi-claude
+
+      Already configured? The launcher reuses your existing Claude profile.
+      If a shell function shadows it, check the packaged executable first:
+        "$(brew --prefix pi-shared)/bin/pi-claude" --list-models claude-bridge
+
+      Upgrade the runtime with brew upgrade pi-shared. Use pi-upstream --help
+      for Pi options. Setup and migration: https://github.com/GeorgeTheo99/homebrew-tap#optional-claude-code-bridge
+      HELP
+          exit 0
+          ;;
+        install|remove|uninstall|list|config|auth|mcp|-v|--version)
+          exec "$pi" "$@"
+          ;;
+        update)
+          echo 'pi-claude: upgrade the runtime with brew upgrade pi-shared; use pi-claude install to select a bridge version.' >&2
+          exit 1
+          ;;
+      esac
+      if [ ! -f "$PI_CODING_AGENT_DIR/settings.json" ]; then
+        echo 'pi-claude: Claude bridge profile is not configured; run pi-claude --help for opt-in setup.' >&2
+        exit 1
+      fi
+      if [ "${1-}" = --list-models ]; then
+        exec "$pi" --models 'claude-bridge/*' "$@"
+      fi
+      # An empty --models match falls back to other providers.
+      if ! models=$("$pi" --offline --no-approve --no-mcp --list-models claude-bridge </dev/null) ||
+         ! printf '%s\\n' "$models" | /usr/bin/awk '$1 == "claude-bridge" { found = 1 } END { exit !found }'; then
+        echo 'pi-claude: no Claude bridge models are registered; run pi-claude --help for opt-in setup.' >&2
+        exit 1
+      fi
+      exec "$pi" --models 'claude-bridge/*' "$@"
+    SH
+    launcher.chmod(0755)
 
     inreplace libexec/"bin/pi", "#!/usr/bin/env python3",
               "#!#{Formula["python@3.12"].opt_bin}/python3.12"
@@ -116,6 +177,9 @@ class PiShared < Formula
       pi <model-alias>; pi <model-alias> --default saves your default.
       pi models lists model aliases; pi list continues to list packages.
       No generated shell functions or shell-startup hook are required.
+      The optional pi-claude launcher uses the same packaged runtime and a
+      separate ~/.pi-claude/agent profile. Bridge installation and Claude
+      Code login remain explicit; run pi-claude --help for setup and migration.
     EOS
   end
 
@@ -216,6 +280,32 @@ class PiShared < Formula
     assert_equal libexec/"runtime/node_modules/@earendil-works/pi-coding-agent/dist/bundle/cli.js",
                  (bin/"pi-upstream").realpath
     assert_equal expected_pi, shell_output("#{bin}/pi-upstream --version").strip
+
+    # Simulate a stale Node earlier on the user's PATH.
+    wrong_runtime = testpath/"wrong-runtime"
+    wrong_runtime.mkpath
+    %w[node pi-upstream].each do |name|
+      (wrong_runtime/name).write "#!/bin/sh\nexit 42\n"
+      (wrong_runtime/name).chmod(0755)
+    end
+    claude = ["/usr/bin/env", "PATH=#{wrong_runtime}:#{ENV.fetch("PATH")}", bin/"pi-claude"].map(&:to_s).shelljoin
+    assert_equal expected_pi, shell_output("#{claude} --version").strip
+    help = shell_output("#{claude} --help")
+    assert_equal help, shell_output("#{claude} -h")
+    assert_match "Usage: pi-claude", help
+    assert_match "~/.pi-claude/agent", help
+    assert_match "claude auth login", help
+    assert_match "pi-claude install npm:pi-claude-bridge@", help
+    assert_match "brew upgrade pi-shared", help
+    assert_match "Install a package", shell_output("#{claude} install --help")
+    assert_match "upgrade the runtime with brew upgrade pi-shared", shell_output("#{claude} update 2>&1", 1)
+    assert_match "Claude bridge profile is not configured", shell_output("#{claude} --list-models 2>&1", 1)
+    refute_path_exists testpath/".pi-claude"
+    (testpath/".pi-claude/agent").mkpath
+    (testpath/".pi-claude/agent/settings.json").write "{}\n"
+    # A different authenticated provider must not become the fallback.
+    assert_match "no Claude bridge models are registered",
+                 shell_output("OPENAI_API_KEY=fixture #{claude} -p </dev/null 2>&1", 1)
     refute_path_exists testpath/".zshrc"
   end
 end
