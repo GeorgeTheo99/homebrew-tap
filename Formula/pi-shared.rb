@@ -5,10 +5,9 @@ class PiShared < Formula
   desc "Pi coding agent with explicit, modular pi-shared setup"
   homepage "https://github.com/GeorgeTheo99/pi-shared"
   # BEGIN STABLE RELEASE (populated only after a real release is verified)
-  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.56.tar.gz"
-  version "0.1.56"
-  sha256 "62eaa518c0341b978ceba786a6e9b48fea6cb08e8d1cc6aff63849adf2e035f9"
-  revision 1
+  url "https://github.com/GeorgeTheo99/pi-setup/archive/refs/tags/v0.1.57.tar.gz"
+  version "0.1.57"
+  sha256 "dec55fad5ef561faf9a153fc9d878898d1b9fd5174c938f1baf66a251a1bf870"
   # END STABLE RELEASE
   license "Apache-2.0"
   head "https://github.com/GeorgeTheo99/pi-setup.git", branch: "main"
@@ -63,10 +62,12 @@ class PiShared < Formula
       case "${1-}" in
         -h|--help)
           /bin/cat <<'HELP'
-      Usage: pi-claude [pi options] [prompt...]
-             pi-claude --list-models [search]
-             pi-claude install|list|remove ...
-             pi-claude --help | --version
+      Usage: pi claude [pi options] [prompt...]
+             pi claude --list-models [search]
+             pi claude install|list|remove ...
+             pi claude --help | --version
+
+      pi-claude remains available as a compatibility command.
 
       Launch Pi through the optional Claude Code bridge. Uses the Pi and Node
       installed by Homebrew's pi-shared package and the ~/.pi-claude/agent profile.
@@ -74,9 +75,9 @@ class PiShared < Formula
 
       First-time setup (requires Claude Code):
         claude auth login
-        pi-claude install npm:pi-claude-bridge@0.11.0
-        pi-claude --list-models claude-bridge
-        pi-claude
+        pi claude install npm:pi-claude-bridge@0.11.0
+        pi claude --list-models
+        pi claude
 
       Already configured? The launcher reuses your existing Claude profile.
       If a shell function shadows it, check the packaged executable first:
@@ -91,24 +92,58 @@ class PiShared < Formula
           exec "$pi" "$@"
           ;;
         update)
-          echo 'pi-claude: upgrade the runtime with brew upgrade pi-shared; use pi-claude install to select a bridge version.' >&2
+          echo 'pi-claude: upgrade the runtime with brew upgrade pi-shared; use pi claude install to select a bridge version.' >&2
           exit 1
           ;;
       esac
       if [ ! -f "$PI_CODING_AGENT_DIR/settings.json" ]; then
-        echo 'pi-claude: Claude bridge profile is not configured; run pi-claude --help for opt-in setup.' >&2
+        echo 'pi claude: Claude bridge profile is not configured; run pi claude --help for opt-in setup.' >&2
         exit 1
       fi
+      search=claude-bridge
       if [ "${1-}" = --list-models ]; then
-        exec "$pi" --models 'claude-bridge/*' "$@"
+        if [ "$#" -gt 2 ]; then
+          echo 'Usage: pi claude --list-models [search]' >&2
+          exit 1
+        fi
+        search="${2:-claude-bridge}"
       fi
       # An empty --models match falls back to other providers.
-      if ! models=$("$pi" --offline --no-approve --no-mcp --list-models claude-bridge </dev/null) ||
-         ! printf '%s\\n' "$models" | /usr/bin/awk '$1 == "claude-bridge" { found = 1 } END { exit !found }'; then
-        echo 'pi-claude: no Claude bridge models are registered; run pi-claude --help for opt-in setup.' >&2
+      models=$("$pi" --offline --no-approve --no-mcp --list-models "$search" </dev/null) || {
+        status=$?
+        echo 'pi claude: could not list models with the packaged Pi runtime. Check pi --version; if that fails, repair Homebrew pi-shared or its Node dependency.' >&2
+        exit "$status"
+      }
+      matches=$(printf '%s\\n' "$models" | /usr/bin/awk 'NR == 1 && $1 == "provider" { header = $0 } $1 == "claude-bridge" { if (!found++ && header != "") print header; print } END { exit !found }') || {
+        echo 'pi claude: no matching Claude bridge models. Try pi claude --list-models without a search, or see pi claude --help for setup.' >&2
         exit 1
+      }
+      if [ "${1-}" = --list-models ]; then
+        printf '%s\\n' "$matches"
+        exit 0
       fi
-      exec "$pi" --models 'claude-bridge/*' "$@"
+      # Pin the provider in the final process, not only in the discovery probe.
+      # Otherwise Pi can fall back if the bridge disappears between launches.
+      for arg do
+        case "$arg" in
+          --provider|--provider=*|--models|--models=*|--no-extensions|-ne)
+            echo 'pi claude: this launcher requires the Claude bridge and does not accept provider, model-scope or extension-disable overrides. Use pi for those options.' >&2
+            exit 1
+            ;;
+        esac
+      done
+      model=$(#{(Formula["python@3.12"].opt_bin/"python3.12").to_s.shellescape} -c '
+      import json, sys
+      from pathlib import Path
+      try:
+          settings = json.loads(Path(sys.argv[1]).read_text())
+          if isinstance(settings, dict) and settings.get("defaultProvider") == "claude-bridge":
+              print(settings.get("defaultModel", ""))
+      except (OSError, ValueError):
+          pass
+      ' "$PI_CODING_AGENT_DIR/settings.json") || exit "$?"
+      model=$(printf '%s\\n' "$matches" | /usr/bin/awk -v preferred="$model" '$1 == "claude-bridge" { if (!first) first = $2; if ($2 == preferred) chosen = $2 } END { print chosen ? chosen : first }')
+      exec "$pi" --provider claude-bridge --model "$model" --models 'claude-bridge/*' "$@"
     SH
     launcher.chmod(0755)
 
@@ -177,9 +212,10 @@ class PiShared < Formula
       pi <model-alias>; pi <model-alias> --default saves your default.
       pi models lists model aliases; pi list continues to list packages.
       No generated shell functions or shell-startup hook are required.
-      The optional pi-claude launcher uses the same packaged runtime and a
+      The optional pi claude launcher uses the same packaged runtime and a
       separate ~/.pi-claude/agent profile. Bridge installation and Claude
-      Code login remain explicit; run pi-claude --help for setup and migration.
+      Code login remain explicit; run pi claude --help for setup and migration.
+      The pi-claude executable remains available for compatibility.
     EOS
   end
 
@@ -292,10 +328,13 @@ class PiShared < Formula
     assert_equal expected_pi, shell_output("#{claude} --version").strip
     help = shell_output("#{claude} --help")
     assert_equal help, shell_output("#{claude} -h")
-    assert_match "Usage: pi-claude", help
+    canonical_claude = ["/usr/bin/env", "PATH=#{wrong_runtime}:#{ENV.fetch("PATH")}", bin/"pi", "claude"].map(&:to_s).shelljoin
+    assert_equal help, shell_output("#{canonical_claude} --help")
+    assert_match "pi claude --help", shell_output("#{bin}/pi --help")
+    assert_match "Usage: pi claude", help
     assert_match "~/.pi-claude/agent", help
     assert_match "claude auth login", help
-    assert_match "pi-claude install npm:pi-claude-bridge@", help
+    assert_match "pi claude install npm:pi-claude-bridge@", help
     assert_match "brew upgrade pi-shared", help
     assert_match "Install a package", shell_output("#{claude} install --help")
     assert_match "upgrade the runtime with brew upgrade pi-shared", shell_output("#{claude} update 2>&1", 1)
@@ -304,8 +343,9 @@ class PiShared < Formula
     (testpath/".pi-claude/agent").mkpath
     (testpath/".pi-claude/agent/settings.json").write "{}\n"
     # A different authenticated provider must not become the fallback.
-    assert_match "no Claude bridge models are registered",
-                 shell_output("OPENAI_API_KEY=fixture #{claude} -p </dev/null 2>&1", 1)
+    assert_match "no matching Claude bridge models",
+                 shell_output("OPENAI_API_KEY=fixture #{canonical_claude} -p </dev/null 2>&1", 1)
+    assert_match "no matching Claude bridge models", shell_output("#{canonical_claude} --list-models 2>&1", 1)
     refute_path_exists testpath/".zshrc"
   end
 end
