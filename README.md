@@ -83,10 +83,10 @@ Development installs can use `brew install --HEAD GeorgeTheo99/tap/pi-shared`.
 
 ## Optional Claude Code bridge
 
-Homebrew `pi-shared` **0.1.56_1** adds `pi-claude`, an optional launcher that
-uses the same bundled Pi and Homebrew Node regardless of your shell's Node
-version. Run `pi-claude --help` for setup or `pi-claude --version` for the
-bundled Pi version. Unlike `pi-anthropic`, it uses the Claude Code bridge,
+`pi claude` is the optional Homebrew Claude Code launcher. It uses the bundled
+Pi and Homebrew Node regardless of your shell's Node version. Run
+`pi claude --help` for setup or `pi claude --version` for the bundled Pi
+version. The `pi-claude` executable remains available for scripts. Unlike `pi-anthropic`, it uses the Claude Code bridge,
 not Pi's native Anthropic provider. It keeps bridge settings and sessions in
 `~/.pi-claude/agent`,
 separate from the default Pi profile. It clears inherited `ANTHROPIC_API_KEY`,
@@ -100,9 +100,9 @@ before changing bridge versions.
 
 ```sh
 claude auth login
-pi-claude install npm:pi-claude-bridge@0.11.0
-pi-claude --list-models claude-bridge
-pi-claude
+pi claude install npm:pi-claude-bridge@0.11.0
+pi claude --list-models
+pi claude
 ```
 
 Already using a local `pi-claude` shell function? Upgrade and check the packaged
@@ -119,8 +119,23 @@ shell startup file and open a new shell. The launcher reuses
 `~/.pi-claude/agent`; no profile migration or separate Pi installation is needed.
 
 Keep upgrading the runtime through Homebrew. Homebrew upgrades leave the bridge
-profile and extension alone; use `pi-claude list` to see installed extensions
-and `pi-claude install` to select a compatible bridge version.
+profile and extension alone; use `pi claude list` to see installed extensions
+and `pi claude install` to select a compatible bridge version.
+
+### Troubleshoot shortcuts
+
+Launcher failures are reported in the terminal, not as desktop notifications.
+
+- **Claude bridge:** `pi claude --list-models` checks whether the bridge
+  registers models without sending a prompt. It does not verify Claude Code
+  login; use `claude auth status` for that.
+- **ChatGPT:** `pi models --direct` lists configured shortcuts, not login
+  status. Use `/login` in Pi and choose **Sign in with ChatGPT** if auth fails.
+- **Runtime:** If `pi --version` fails before any model loads, check Homebrew.
+  A `dyld` error naming Node and a missing dylib points to the Node formula
+  in the error, not your provider login.
+- **Literal prompts:** Use `pi -- openai` or `pi -- claude` to send the word
+  as a prompt rather than invoking a shortcut.
 
 ## model-gateway
 
@@ -156,7 +171,7 @@ instead; use one or the other on a machine, since both register the same
 - The Pi CLI and setup orchestrator under Homebrew `libexec`. npm uses the
   committed lockfile with lifecycle scripts disabled; its cache/config stay in
   the disposable build directory. `pi` is a thin dispatcher; `pi-upstream` is
-  the stock-runtime symlink used for recovery and SDK discovery. `pi-claude`
+  the stock-runtime symlink used for recovery and SDK discovery. `pi claude`
   is the opt-in [Claude Code bridge launcher](#optional-claude-code-bridge).
 - **Nothing is provisioned automatically:** no Pi profile or shell changes,
   credential prompts, service registration, or LLM downloads during
